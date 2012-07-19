@@ -1,0 +1,81 @@
+#
+# Jamroot
+#
+# Copyright 2012 Darren Kessner
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
+
+import testing ; # for unit-test rule
+
+
+project simrecomb
+    : requirements
+        <toolset>gcc:<cxxflags>-Wno-parentheses
+    : default-build
+        <link>static
+        #<runtime-link>static
+        <warnings-as-errors>on
+        <warnings>all
+        #<threading>multi
+    ;
+
+
+lib boost_system ;
+lib boost_filesystem ;
+
+
+lib libsimrecomb :
+    Chromosome.cpp 
+    MSFormat.cpp
+    Organism.cpp 
+    Population.cpp
+    Random.cpp 
+    RecombinationMap.cpp 
+    ;
+
+
+unit-test ChromosomeTest : ChromosomeTest.cpp libsimrecomb ;
+unit-test OrganismTest : OrganismTest.cpp libsimrecomb ;
+unit-test PopulationTest : PopulationTest.cpp libsimrecomb ;
+unit-test RandomTest : RandomTest.cpp libsimrecomb ;
+unit-test RecombinationMapTest : RecombinationMapTest.cpp libsimrecomb ;
+
+
+run MSFormatTest.cpp libsimrecomb
+    : # args
+    : MSFormatTest.data/ms_format_1.txt MSFormatTest.data/ms_format_2.txt # input-files
+    : # requirements
+    : MSFormatTest # target name
+    : # default-build
+    ;
+
+
+exe simrecomb : simrecomb.cpp libsimrecomb boost_system boost_filesystem ;
+exe analyze_population : analyze_population.cpp libsimrecomb boost_system boost_filesystem ;
+exe subsample_population : subsample_population.cpp libsimrecomb boost_system boost_filesystem ;
+exe recombine_data : recombine_data.cpp libsimrecomb boost_system boost_filesystem ;
+exe john_question : john_question.cpp libsimrecomb boost_system boost_filesystem ;
+exe test_splice : test_splice.cpp ;
+exe test_map : test_map.cpp libsimrecomb ;
+
+
+install bin  
+    : test_splice test_map simrecomb analyze_population subsample_population recombine_data john_question
+    : <location>bin 
+      <install-dependencies>on
+      <install-type>EXE
+      <install-type>LIB
+    ;
+
