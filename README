@@ -1,0 +1,82 @@
+simrecomb
+Copyright 2012 Darren Kessner
+
+simrecomb simulates and tracks individual haplotype blocks, with specified recombination maps,
+in multiple populations with admixture.  The simulation tags each haplotype block with an identifier,
+which includes information about the source population, individual, chromosome pair and chromosome parent.
+
+------------------------------------------------------------------------------------------
+
+Building simrecomb:
+
+simrecomb uses the Boost C++ libraries, as well as the Boost build system, i.e. you will need
+to install Boost before building simrecomb.  To build, run "bjam" from the project directory, where
+it will find Jamroot for the build instructions.  Executables will be placed in the "bin" subdir.
+
+------------------------------------------------------------------------------------------
+
+First run from the project directory:
+
+bin/simrecomb default > config.txt
+bin/simrecomb config.txt output
+
+You should see the configuration file "config.txt" now, as well as the "output" directory, containing
+output from the simulation.
+
+------------------------------------------------------------------------------------------
+
+Explanation of the default configuration file:
+
+geneticMapFilenames 3
+geneticMapFilename genetic_map_chr21_b36.txt
+geneticMapFilename genetic_map_chr21_b36.txt
+geneticMapFilename genetic_map_chr21_b36.txt
+
+These lines specify the genetic map file(s) -- in this case, it is the same file, used for
+3 chromosomes.
+
+---
+
+generation 0
+population size=0 populationID=0
+population size=10000 populationID=1 chromosomePairCount=3
+population size=10000 populationID=2 chromosomePairCount=3
+
+Initial generation, with 3 populations, specified population sizes, population
+ids, and # of chromosome pairs per individual.
+
+---
+
+generation 1
+population size=10000 populationID=0 matingDistribution={<0.64|1,1><0.32|1,2><0.04|2,2>}
+
+Specifies admixture from populations 1 and 2 in the previous generation 0, to
+create population 0 in generation 1.  The mating distribution specifies the joint distribution
+of parent populations used to create individuals in this new population.  In this case, it
+is equivalent to 80% population 1, 20% population 2, with random mating:  64% both parents from pop1,
+32% one parent each from pop1 and pop2, 4% both parents from pop2.
+
+---
+
+generation 2
+population size=10000 populationID=0 matingDistribution={<1|0,0>}
+
+Create new population 0 from previous population 0, i.e. random mating.
+
+------------------------------------------------------------------------------------------
+
+Explanation of output:
+
+simulationConfig.txt:  parsed and rewritten configuration
+log.txt:  full log of the simulation
+population_full.txt:  individuals of the final generation
+
+This is a single chromosome:
++ { (0,<2,2127,0,1>) (14762956,<1,5503,0,0>) (15162040,<1,620,0,1>) (27852411,<1,8832,0,1>) }
+
++/- indicate which chromosome of the chromosome pair.  This one has 4 haplotype blocks, starting
+at positions 0, 14762956, 15162040, 27852411.  The identity of the first block is <2,2127,0,1>, meaning
+that it is from population 2, individual 2127, 0th chromosome pair, chromosome 1 of the pair 
+(here encoded {0,1} instead of +/-).
+
+
