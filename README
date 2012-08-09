@@ -79,4 +79,18 @@ at positions 0, 14762956, 15162040, 27852411.  The identity of the first block i
 that it is from population 2, individual 2127, 0th chromosome pair, chromosome 1 of the pair 
 (here encoded {0,1} instead of +/-).
 
+-------------------------------------------------------------------------------------------
+
+Attaching SNP data to simrecomb output:
+
+The tool recombine_data (also built with simrecomb) can be used to combine the output from
+simrecomb with the output from Hudson's ms tool.  ms is used to generate SNP data for the 
+ancestral populations, which is then mapped to haplotypes in the starting generation of
+simrecomb.  recombine_data outputs SNP data for the final admixed population, whose individuals' 
+chromosomes are mosaics of haplotypes from the initial population.
+
+Running recombine_data with no arguments will give the usage information.
+
+
+
 
