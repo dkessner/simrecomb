@@ -30,7 +30,7 @@ using namespace std;
 
 namespace {
 
-double factorial(double n)
+unsigned int factorial(unsigned int n)
 {
     unsigned int result = 1; 
     for (; n>1; n--) result *= n;
@@ -56,9 +56,9 @@ RecombinationMap::RecombinationMap(const string& filename)
     // rate == cumulative geneticMap probability == expected # of events
     double rate = records_.back().geneticMap * .01; // cM * .01 = probability
     double total = 0;
-    for (double i=0; i<10; i++)
+    for (unsigned int i=0; i<10; i++)
     {     
-        total += exp(-rate)*pow(rate, i)/factorial(i);
+        total += exp(-rate)*pow(rate, double(i))/factorial(i);
         recombinationEventDistribution_.push_back(total);
     }
 }
