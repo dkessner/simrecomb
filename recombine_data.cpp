@@ -149,11 +149,12 @@ Config parseCommandLine(int argc, char* argv[])
     {
         cout << "Usage: recombine_data <populationFile> <msFile1> <msFile2> <outdir> <chromosome> <begin> <end>\n";
         cout << "\n";
-        cout << "  msFile1     :  ancestral population 1 in ms format\n";
-        cout << "  msFile2     :  ancestral population 2 in ms format\n";
-        cout << "  chromosome  :  chromosome pair index\n";
-        cout << "  begin       :  chromosome position mapped to 0\n";
-        cout << "  end         :  chromosome position mapped to 1\n";
+        cout << "  populationFile :  population file output from simrecomb\n";
+        cout << "  msFile1        :  ancestral population 1 in ms format\n";
+        cout << "  msFile2        :  ancestral population 2 in ms format\n";
+        cout << "  chromosome     :  chromosome pair index (0-based)\n";
+        cout << "  begin          :  chromosome position mapped to 0\n";
+        cout << "  end            :  chromosome position mapped to 1\n";
         cout << "\n";
         cout << "Darren Kessner\n";
         cout << "John Novembre Lab, UCLA\n";
