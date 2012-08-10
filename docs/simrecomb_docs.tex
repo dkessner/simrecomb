@@ -123,20 +123,25 @@ population size=10000 populationID=0 matingDistribution={<1|0,0>}
 
 \section*{Output}
 
-Explanation of output files: \\
-\texttt{simulationConfig.txt}:  parsed and rewritten configuration \\
-\texttt{log.txt}:  full log of the simulation \\
-\texttt{population\_full.txt}:  individuals of the final generation \\
+\texttt{simrecomb} produces the following output files: \\
 
-\noindent This is a single chromosome:
+\noindent
+\texttt{simrecomb\_config.txt}:  configuration used for the simulation \\
+\texttt{log.txt}:  full log of the simulation \\
+\texttt{pop?.txt}:  populations of the final generation \\
+
+\noindent In the output data, each chromosome is listed on a separate
+line, starting with + or -, which indicates which chromosome of the 
+chromosome pair.  A blank line separates individuals. 
+This is an example of a single chromosome:
 \begin{verbatim}
 + { (0,<2,2127,0,1>) (14762956,<1,5503,0,0>) \\
     (15162040,<1,620,0,1>) (27852411,<1,8832,0,1>) }
 \end{verbatim}
 
-\noindent +/- indicate which chromosome of the chromosome pair.  This one has 4 haplotype
+\noindent The chromosome above has 4 haplotype
 blocks, starting at positions 0, 14762956, 15162040, 27852411.  The identity of
-the first block is $\langle 2,2127,0,1 \rangle$, meaning that it is from
+the first block is $\langle 2,2127,0,1 \rangle$, which indicates that it is from
 population 2, individual 2127, 0th chromosome pair (0-based indexing),
 chromosome 1 of the pair (here encoded \{0,1\} instead of +/-).
 
@@ -144,17 +149,22 @@ chromosome 1 of the pair (here encoded \{0,1\} instead of +/-).
 
 \section*{Combining \texttt{simrecomb} with \texttt{ms}}
 
-The tool \texttt{recombine\_data} (packaged with \texttt{simrecomb}) can be
-used to combine the output from \texttt{simrecomb} with the output from
-Hudson's \texttt{ms} tool.  \texttt{ms} is used to generate SNP data for the
-ancestral populations, which is then mapped to haplotypes in the starting
-generation of \texttt{simrecomb}.  \texttt{recombine\_data} outputs SNP data
-for the final admixed population, whose individuals' chromosomes are mosaics of
-haplotypes from the initial population. \\
+(Currently this works for the case of a final population resulting from
+admixture of populations 1 and 2 only -- email Darren if you would like
+to handle a more general case.) \\
 
-\noindent Running \texttt{recombine\_data} with no arguments will give the usage information.
+\noindent The tool \texttt{recombine\_data} (packaged with \texttt{simrecomb}) can be
+used to combine the output from \texttt{simrecomb} with the output from Richard
+Hudson's \texttt{ms} tool. \\
 
+\noindent \texttt{recombine\_data} maps the 0/1 SNP values in \texttt{ms} format to
+chromosomes in ancestral populations 1 and 2.  Individuals in the final
+generation have chromosomes that are mosaics of haplotype blocks from the two
+ancestral populations.  \texttt{recombine\_data} outputs sequences for these
+mosaic chromosomes. \\
 
+\noindent Running \texttt{recombine\_data} with no arguments will give the
+usage information. \\
 
 \end{document}
 

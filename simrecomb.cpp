@@ -195,7 +195,7 @@ shared_ptr<Populations> createPopulations(shared_ptr<Populations> current,
 
 void simulate(const Config& config)
 {
-    bfs::ofstream osSimulationConfig(config.outputDirectory / "simulationConfig.txt");
+    bfs::ofstream osSimulationConfig(config.outputDirectory / "simrecomb_config.txt");
     osSimulationConfig << config.simulationConfig;
     osSimulationConfig.close();
 
@@ -218,11 +218,15 @@ void simulate(const Config& config)
 
     osLog.close();
 
-    // output the entire last admixed population
-    bfs::ofstream osPopulation_full(config.outputDirectory / "population_full.txt");
-    osPopulation_full << *(*current)[0];
-
-    // TODO: output subsampled populations
+    // output the last generation
+    
+    for (size_t i=0; i<current->size(); ++i)
+    {
+        ostringstream filename;
+        filename << "pop" << i << ".txt"; 
+        bfs::ofstream os_pop(config.outputDirectory / filename.str());
+        os_pop << *(*current)[i];
+    }
 }
 
 
