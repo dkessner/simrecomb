@@ -33,7 +33,7 @@ namespace bfs = boost::filesystem;
 
 struct SimulationConfig
 {
-    double seed;
+    unsigned int seed;
     vector<string> geneticMapFilenames;
     vector< vector<Population::Config> > populationConfigs; // each generation is a vector<Population::Config>
 
