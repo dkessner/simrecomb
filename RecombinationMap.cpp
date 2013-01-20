@@ -40,7 +40,8 @@ unsigned int factorial(unsigned int n)
 } // namespace
 
 
-RecombinationMap::RecombinationMap(const string& filename)
+RecombinationMap::RecombinationMap(const string& filename, const Random& random)
+:   random_(random)
 {
     // read in data file
     ifstream is(filename.c_str());
@@ -65,8 +66,6 @@ RecombinationMap::RecombinationMap(const string& filename)
 
 
 namespace {
-
-Random random_;
 
 struct HasLowerGeneticMap
 {

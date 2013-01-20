@@ -33,7 +33,7 @@ class MatingDistribution
 
     MatingDistribution() : totalWeight_(0) {}
     void push_back(double weight, const IndexPair& indexPair);
-    const IndexPair& random() const;
+    const IndexPair& random_index_pair(const Random& random) const;
 
     struct Entry
     {
@@ -86,20 +86,23 @@ class Population
     };
 
     // construct an initial Population
-    Population(const Config& config);
+    Population(const Config& config, const Random& random);
 
     // construct a Population from Populations (e.g. from a previous generation)
     Population(const Config& config,
-               const Populations& populations);
+               const Populations& populations,
+               const Random& random);
 
     // construct from file
-    Population(const std::string& filename);
+    Population(const std::string& filename, const Random& random);
 
     const std::vector<Organism>& organisms() const {return organisms_;}
 
     boost::shared_ptr<Population> randomSubsample(size_t size) const;    
 
     private:
+
+    const Random& random_;
     std::vector<Organism> organisms_;
 
     friend std::istream& operator>>(std::istream& is, Population& p);

@@ -97,8 +97,10 @@ string getSequence(const Chromosome& chromosome, const MSFormat& ms1,
 
 void recombineData(const Config& config)
 {
+    Random random;
+
     cout << "Reading population data.\n";
-    Population population(config.populationFilename);
+    Population population(config.populationFilename, random);
     cout << "Population size: " << population.organisms().size() << endl;
 
     MSFormat ms1(config.msFilename1);

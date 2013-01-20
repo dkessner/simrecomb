@@ -31,10 +31,6 @@ using boost::shared_ptr;
 // RecombinationPositionGenerator
 //
 
-
-Random random_;
-
-
 vector<unsigned int> RecombinationPositionGenerator_Trivial::get_positions(size_t index) const
 {
     vector<unsigned int> result;
@@ -56,11 +52,14 @@ vector<unsigned int> RecombinationPositionGenerator_RecombinationMap::get_positi
 }
 
 
-RecombinationPositionGenerator_RecombinationMap::RecombinationPositionGenerator_RecombinationMap(const vector<string>& filenames)
+RecombinationPositionGenerator_RecombinationMap::RecombinationPositionGenerator_RecombinationMap(
+        const vector<string>& filenames,
+        const Random& random)
+:   random_(random)
 {
     for (vector<string>::const_iterator it=filenames.begin(); it!=filenames.end(); ++it)
         recombinationMaps_.push_back(shared_ptr<RecombinationMap>(
-            new RecombinationMap(*it)));
+            new RecombinationMap(*it, random)));
 }
 
 
@@ -100,8 +99,9 @@ Organism::Organism(const Gamete& g1, const Gamete& g2)
 Organism::Gamete Organism::create_gamete() const
 {
     if (!recombinationPositionGenerator_.get())
-        recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_Trivial);
+        throw runtime_error("[Organism::create_gamete()] No RecombinationPositionGenerator");
+        //recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>(
+        //    new RecombinationPositionGenerator_Trivial);
 
     Gamete result;
 

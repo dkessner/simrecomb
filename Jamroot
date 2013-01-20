@@ -28,6 +28,7 @@ project simrecomb
         #<runtime-link>static
         <warnings-as-errors>on
         <warnings>all
+        <variant>profile
         #<threading>multi
     ;
 

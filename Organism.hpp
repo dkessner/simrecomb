@@ -20,6 +20,7 @@
 #define _ORGANISM_HPP_
 
 
+#include "Random.hpp"
 #include "Chromosome.hpp"
 #include "RecombinationMap.hpp"
 #include "boost/shared_ptr.hpp"
@@ -44,7 +45,13 @@ class RecombinationPositionGenerator
 class RecombinationPositionGenerator_Trivial : public RecombinationPositionGenerator
 {
     public:
+
+    RecombinationPositionGenerator_Trivial(const Random& random) : random_(random) {};
+
     virtual std::vector<unsigned int> get_positions(size_t index) const;
+
+    private:
+    const Random& random_;
 };
 
 
@@ -54,10 +61,14 @@ class RecombinationPositionGenerator_Trivial : public RecombinationPositionGener
 class RecombinationPositionGenerator_RecombinationMap : public RecombinationPositionGenerator
 { 
     public:
-    RecombinationPositionGenerator_RecombinationMap(const std::vector<std::string>& filenames);
+
+    RecombinationPositionGenerator_RecombinationMap(const std::vector<std::string>& filenames,
+                                                    const Random& random);
+
     virtual std::vector<unsigned int> get_positions(size_t index) const;
 
     private:
+    const Random& random_;
     std::vector< boost::shared_ptr<RecombinationMap> > recombinationMaps_;
 };
 

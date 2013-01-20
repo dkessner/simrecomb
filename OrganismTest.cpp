@@ -134,7 +134,8 @@ void test_construction_gamete()
 void test_RecombinationPositionGenerator_Trivial()
 {
     if (os_) *os_ << "test_RecombinationPositionGenerator_Trivial()\n";
-    RecombinationPositionGenerator_Trivial trivial;
+    Random random;
+    RecombinationPositionGenerator_Trivial trivial(random);
     RecombinationPositionGenerator& r = trivial; // default param in base interface only
     for (int i=0; i<10; i++)
         if (os_) *os_ << r.get_positions().size() << endl;
@@ -183,10 +184,12 @@ void test_recombination_map()
     vector<string> filenames;
     for (int i=0; i<3; i++) 
         filenames.push_back("genetic_map_chr21_b36.txt");
+
+    Random random;
     
     Organism::recombinationPositionGenerator_ =
         shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_RecombinationMap(filenames));
+            new RecombinationPositionGenerator_RecombinationMap(filenames, random));
 
     Organism::Gamete m1;
     m1.push_back(Chromosome(1));

@@ -31,7 +31,8 @@ ostream* os_ = 0;
 
 void test()
 {
-    RecombinationMap r("genetic_map_chr21_b36.txt");
+    Random random;
+    RecombinationMap r("genetic_map_chr21_b36.txt", random);
     unit_assert(r.records().size() == 44250);
 
     for (int i=0; i<10; i++) 

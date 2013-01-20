@@ -30,11 +30,6 @@ using namespace std;
 using boost::shared_ptr;
 
 
-namespace {
-Random random_;
-} // namespace
-
-
 //
 // MatingDistribution
 //
@@ -58,9 +53,9 @@ void MatingDistribution::push_back(double weight, const IndexPair& indexPair)
 }
 
 
-const MatingDistribution::IndexPair& MatingDistribution::random() const
+const MatingDistribution::IndexPair& MatingDistribution::random_index_pair(const Random& random) const
 {
-    double roll = random_.uniform(0, totalWeight_);
+    double roll = random.uniform(0, totalWeight_);
 
     vector<Entry>::const_iterator it = lower_bound(entries_.begin(), entries_.end(),
                                                    Entry(roll, make_pair(0,0)), HasLowerWeight());
@@ -68,7 +63,7 @@ const MatingDistribution::IndexPair& MatingDistribution::random() const
     {
         cout << "totalWeight_: " << totalWeight_ << endl;
         cout << "roll: " << roll << endl;
-        throw runtime_error("[MatingDistribution::Impl::random()] This isn't happening.");
+        throw runtime_error("[MatingDistribution::Impl::random_index_pair()] This isn't happening.");
     }
     
     return it->indexPair;
@@ -172,7 +167,8 @@ istream& operator>>(istream& is, MatingDistribution& md)
 //
 
 
-Population::Population(const Config& config)
+Population::Population(const Config& config, const Random& random)
+:   random_(random)
 {
     for (size_t i=0; i<config.size; ++i)
     {
@@ -183,11 +179,13 @@ Population::Population(const Config& config)
 
 
 Population::Population(const Config& config,
-                       const Populations& populations)
+                       const Populations& populations,
+                       const Random& random)
+:   random_(random)
 {
     for (size_t i=0; i<config.size; ++i)
     {
-        const MatingDistribution::IndexPair& parentIndices = config.matingDistribution.random();
+        const MatingDistribution::IndexPair& parentIndices = config.matingDistribution.random_index_pair(random_);
 
         if (max(parentIndices.first,parentIndices.second) >= populations.size())
             throw runtime_error("[Population::Population()] Indices out of bounds.");
@@ -212,7 +210,8 @@ Population::Population(const Config& config,
 }
 
 
-Population::Population(const std::string& filename)
+Population::Population(const std::string& filename, const Random& random)
+:   random_(random)
 {
     ifstream is(filename.c_str());
     if (!is)
@@ -234,7 +233,7 @@ shared_ptr<Population> Population::randomSubsample(size_t size) const
     while (indices.size() < size) // may take a long time if size is close to organisms_.size()
         indices.insert(random_.randint(0,organisms_.size()-1));
 
-    shared_ptr<Population> subsample(new Population(Config()));
+    shared_ptr<Population> subsample(new Population(Config(), random_));
 
     for (set<size_t>::const_iterator it=indices.begin(); it!=indices.end(); ++it)
         subsample->organisms_.push_back(organisms_[*it]);

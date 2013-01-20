@@ -47,8 +47,10 @@ struct Config
 
 void subsamplePopulation(const Config& config)
 {
+    Random random;
+
     Population::Config dummy;
-    Population p(dummy);
+    Population p(dummy, random);
     bfs::ifstream is(config.filename);
 
     cout << "Reading population data.\n";

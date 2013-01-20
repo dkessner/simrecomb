@@ -20,6 +20,7 @@
 #define _RECOMBINATIONMAP_HPP_
 
 
+#include "Random.hpp"
 #include <vector>
 #include <string>
 
@@ -29,7 +30,7 @@ class RecombinationMap
     public:
 
     // construct with filename "genetic_map_..."
-    RecombinationMap(const std::string& filename);
+    RecombinationMap(const std::string& filename, const Random& random);
 
     //
     // HapMap recombination rate 3-column data from files "genetic_map_*":
@@ -60,6 +61,7 @@ class RecombinationMap
     std::vector<unsigned int> random_positions();
 
     private:
+    const Random& random_;
     Records records_;
     std::vector<double> recombinationEventDistribution_;
 };

@@ -31,7 +31,7 @@ ostream* os_ = 0;
 
 void testMatingDistribution()
 {
-    if (os_) *os_ << "testMatingDistribution()\n";
+    if (os_) *os_ << "testMatingDistribution()\n" << flush;
 
     MatingDistribution md;
     md.push_back(.6, make_pair(0,0));
@@ -47,9 +47,11 @@ void testMatingDistribution()
 
     vector<int> counts(3);
 
+    Random random;
+
     for (int i=0; i<9000; i++)
     {
-        const MatingDistribution::IndexPair& p = md.random();
+        const MatingDistribution::IndexPair& p = md.random_index_pair(random);
         counts[p.first]++;
     }
 
@@ -106,10 +108,12 @@ void testPopulation_initial()
 {
     if (os_) *os_ << "testPopulation_initial()\n";
 
+    Random random;
+
     Population::Config config0;
     config0.size = 10;
     config0.populationID = 0;
-    Population p0(config0);
+    Population p0(config0, random);
     unit_assert(p0.organisms().size() == 10);
     if (os_) *os_ << "p0:\n" << p0 << endl;
 
@@ -118,7 +122,7 @@ void testPopulation_initial()
     config1.populationID = 1;
     config1.idOffset = 1000; // individuals==1000,1001,..., 
     config1.chromosomePairCount = 3;
-    Population p1(config1);
+    Population p1(config1, random);
     unit_assert(p1.organisms().size() == 4);
     if (os_) *os_ << "p1:\n" << p1 << endl;
     if (os_) *os_ << endl;
@@ -129,6 +133,11 @@ void testPopulation_generated()
 {
     if (os_) *os_ << "testPopulation_generated()\n";
 
+    Random random;
+
+    Organism::recombinationPositionGenerator_ =
+        shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Trivial(random));
+
     Population::Config config0;
     config0.size = 10;
     config0.populationID = 0;
@@ -137,8 +146,8 @@ void testPopulation_generated()
     config1.size = 10;
     config1.populationID = 1;
 
-    shared_ptr<Population> p0(new Population(config0));
-    shared_ptr<Population> p1(new Population(config1));
+    shared_ptr<Population> p0(new Population(config0, random));
+    shared_ptr<Population> p1(new Population(config1, random));
 
     if (os_) *os_ << "p0:\n" << *p0 << endl;
     if (os_) *os_ << "p1:\n" << *p1 << endl;
@@ -155,7 +164,7 @@ void testPopulation_generated()
     config_nextgen.matingDistribution.push_back(.2, make_pair(1,1));
 
 
-    Population nextgen(config_nextgen, populations);
+    Population nextgen(config_nextgen, populations, random);
     if (os_) *os_ << "nextgen:\n" << nextgen << endl;
 
     int count00 = 0;
@@ -183,10 +192,12 @@ void testPopulationIO()
 {
     if (os_) *os_ << "testPopulationIO()\n";
 
+    Random random;
+
     Population::Config config;
     config.size = 10;
     config.populationID = 0;
-    Population p(config);
+    Population p(config, random);
     unit_assert(p.organisms().size() == 10);
     if (os_) *os_ << "p:\n" << p << endl;
 
@@ -194,7 +205,7 @@ void testPopulationIO()
     oss << p;
 
     Population::Config config2;
-    Population q(config2);        
+    Population q(config2, random);
     unit_assert(p != q);
 
     istringstream iss(oss.str());

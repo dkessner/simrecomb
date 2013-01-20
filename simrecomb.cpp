@@ -33,13 +33,18 @@ namespace bfs = boost::filesystem;
 
 struct SimulationConfig
 {
+    double seed;
     vector<string> geneticMapFilenames;
     vector< vector<Population::Config> > populationConfigs; // each generation is a vector<Population::Config>
+
+    SimulationConfig() : seed(0) {}
 };
 
 
 ostream& operator<<(ostream& os, const SimulationConfig& simulationConfig)
 {
+    os << "seed " << simulationConfig.seed << endl << endl;
+
     os << "geneticMapFilenames " << simulationConfig.geneticMapFilenames.size() << endl; 
     for (vector<string>::const_iterator it=simulationConfig.geneticMapFilenames.begin();
          it!=simulationConfig.geneticMapFilenames.end(); ++it)
@@ -76,6 +81,8 @@ istream& operator>>(istream& is, SimulationConfig& simulationConfig)
 
         if (tokens.empty())
             continue;
+        else if (tokens[0] == "seed" && tokens.size() == 2)
+            simulationConfig.seed = atoi(tokens[1].c_str());
         else if (tokens[0] == "geneticMapFilenames")
             continue;
         else if (tokens[0] == "geneticMapFilename" && tokens.size()==2)
@@ -117,13 +124,12 @@ void printPopulations(ostream& os, const Populations& populations, const string&
 }
 
 
-const size_t chromosomePairCount_ = 3; // hardcoded
-const unsigned int populationSize_ = 10000; // hardcoded
-const double admixtureProportion_ = .8; // hardcoded fraction of genes from 1st population
-
-
 void initializeDefaultSimulationConfig(SimulationConfig& simulationConfig)
 {
+    const size_t chromosomePairCount_ = 3;
+    const unsigned int populationSize_ = 10000;
+    const double admixtureProportion_ = .8; // fraction of genes from 1st population
+
     for (size_t i=0; i<chromosomePairCount_; i++) 
         simulationConfig.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
 
@@ -168,25 +174,26 @@ void initializeDefaultSimulationConfig(SimulationConfig& simulationConfig)
 }
 
 
-void initializeRecombinationMaps(const Config& config)
+void initializeRecombinationMaps(const Config& config, const Random& random)
 {
     Organism::recombinationPositionGenerator_ =
         shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_RecombinationMap(config.simulationConfig.geneticMapFilenames));
+            new RecombinationPositionGenerator_RecombinationMap(config.simulationConfig.geneticMapFilenames, random));
 }
 
 
 shared_ptr<Populations> createPopulations(shared_ptr<Populations> current, 
-                                          const vector<Population::Config>& populationConfigs)
+                                          const vector<Population::Config>& populationConfigs,
+                                          const Random& random)
 {
     shared_ptr<Populations> result(new Populations);
 
     for (vector<Population::Config>::const_iterator it=populationConfigs.begin(); it!=populationConfigs.end(); ++it)
     {
         if (!current.get())
-            result->push_back(shared_ptr<Population>(new Population(*it)));
+            result->push_back(shared_ptr<Population>(new Population(*it, random)));
         else
-            result->push_back(shared_ptr<Population>(new Population(*it, *current)));
+            result->push_back(shared_ptr<Population>(new Population(*it, *current, random)));
     }
 
     return result; 
@@ -199,8 +206,10 @@ void simulate(const Config& config)
     osSimulationConfig << config.simulationConfig;
     osSimulationConfig.close();
 
+    Random random(config.simulationConfig.seed);
+
     cout << "Initializing recombination maps.\n";
-    initializeRecombinationMaps(config);
+    initializeRecombinationMaps(config, random);
 
     bfs::ofstream osLog(config.outputDirectory / "log.txt");
 
@@ -209,7 +218,7 @@ void simulate(const Config& config)
     {
         cout << "Generation " << generation << endl;
         shared_ptr<Populations> next = 
-            createPopulations(current, config.simulationConfig.populationConfigs[generation]);
+            createPopulations(current, config.simulationConfig.populationConfigs[generation], random);
         current = next;
         ostringstream label;
         label << "gen" << generation;
