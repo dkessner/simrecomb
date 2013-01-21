@@ -28,6 +28,7 @@ using boost::shared_ptr;
 
 
 ostream* os_ = 0;
+//ostream* os_ = &cout;
 
 
 void test_construction()
@@ -131,9 +132,9 @@ void test_construction_gamete()
 }
 
 
-void test_RecombinationPositionGenerator_Trivial()
+void demo_RecombinationPositionGenerator_Trivial()
 {
-    if (os_) *os_ << "test_RecombinationPositionGenerator_Trivial()\n";
+    if (os_) *os_ << "demo_RecombinationPositionGenerator_Trivial()\n";
     Random random;
     RecombinationPositionGenerator_Trivial trivial(random);
     RecombinationPositionGenerator& r = trivial; // default param in base interface only
@@ -151,9 +152,16 @@ void print_gamete(ostream& os, const Organism::Gamete& g, const string& name = "
 }
 
 
-void test_create_gamete()
+void demo_create_gamete()
 {
-    if (os_) *os_ << "test_create_gamete()\n";
+    if (os_) *os_ << "demo_create_gamete()\n";
+
+    Random random;
+
+    Organism::recombinationPositionGenerator_ =
+        shared_ptr<RecombinationPositionGenerator>(
+            new RecombinationPositionGenerator_Trivial(random));
+
 
     Organism::Gamete g1;
     g1.push_back(Chromosome(1));
@@ -177,9 +185,9 @@ void test_create_gamete()
 }
 
 
-void test_recombination_map()
+void demo_recombination_map()
 {
-    if (os_) *os_ << "test_recombination_map()\n";
+    if (os_) *os_ << "demo_recombination_map()\n";
 
     vector<string> filenames;
     for (int i=0; i<3; i++) 
@@ -237,15 +245,81 @@ void test_recombination_map()
 }
 
 
+class RecombinationPositionGenerator_Testing : public RecombinationPositionGenerator
+{
+    public:
+
+    RecombinationPositionGenerator_Testing()
+    :   count_(1)
+    {}
+
+    virtual vector<unsigned int> get_positions(size_t index) const
+    {
+        vector<unsigned int> result;
+        if (count_ % 2) result.push_back(0); // start with 2nd chromosome when count_ is odd
+        result.push_back(count_ * 10000);
+        ++count_;
+        return result;
+    }
+
+    private:
+    mutable size_t count_;
+};
+
+
+void test_construction_parents()
+{
+    if (os_) *os_ << "test_construction_parents()\n";
+
+    Organism mom(Chromosome::ID(0,7,0,0), 3);
+    Organism dad(Chromosome::ID(0,8,0,0), 3);
+
+    if (os_) *os_ << "mom:\n" << mom << "dad:\n" << dad;
+
+    Organism::recombinationPositionGenerator_ = 
+        shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Testing);
+
+    // make baby with Organism(Organism&, Organism&) constructor
+
+    Organism baby(mom, dad);
+
+    if (os_) *os_ << "baby:\n" << baby;
+
+    for (size_t i=0; i<6; ++i)
+    {
+        const ChromosomePair& p = baby.chromosomePairs()[i/2];
+        const Chromosome& c = (i%2==0) ? p.first : p.second;
+        Chromosome::ID id0(c.blocks()[0].id);
+        Chromosome::ID id1(c.blocks()[1].id);
+
+        unit_assert(c.blocks().size() == 2);
+        unit_assert(c.blocks()[0].position == 0);
+        unit_assert(c.blocks()[1].position == (i+1)*10000);
+        if (i%2 == 0) 
+        {
+            unit_assert(id0.individual == 7 && id1.individual == 7);
+            unit_assert(id0.which == 1 && id1.which == 0);
+        }
+        else
+        {
+            unit_assert(id0.individual == 8 && id1.individual == 8);
+            unit_assert(id0.which == 0 && id1.which == 1);
+        }
+        unit_assert(id0.pair == i/2 && id1.pair == i/2);
+    }
+}
+
+
 void test()
 {
     test_construction();
     test_equality();
     test_write_read();
     test_construction_gamete();
-    test_RecombinationPositionGenerator_Trivial();
-    test_create_gamete();
-    test_recombination_map();
+    demo_RecombinationPositionGenerator_Trivial();
+    demo_create_gamete();
+    demo_recombination_map();
+    test_construction_parents();
 }
 
 

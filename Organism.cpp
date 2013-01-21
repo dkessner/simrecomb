@@ -21,6 +21,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <iterator>
 
 
 using namespace std;
@@ -96,12 +97,34 @@ Organism::Organism(const Gamete& g1, const Gamete& g2)
 }
 
 
+Organism::Organism(const Organism& mom, const Organism& dad)
+{
+    if (!recombinationPositionGenerator_.get())
+        throw runtime_error("[Organism::Organism(mom, dad)] No RecombinationPositionGenerator.");
+
+    if (mom.chromosomePairs_.size() != dad.chromosomePairs_.size())
+        throw runtime_error("[Organism::Organism(mom, dad)] Parents chromosome counts differ.");
+
+    this->chromosomePairs_.reserve(mom.chromosomePairs_.size());
+
+    size_t chromosome_index = 0;
+    for (ChromosomePairs::const_iterator it=mom.chromosomePairs_.begin(), jt=dad.chromosomePairs_.begin();
+         it!=mom.chromosomePairs_.end(); ++it, ++jt, ++chromosome_index)
+    {
+        vector<unsigned int> positions_mom = recombinationPositionGenerator_->get_positions(chromosome_index);
+        vector<unsigned int> positions_dad = recombinationPositionGenerator_->get_positions(chromosome_index);
+
+        this->chromosomePairs_.push_back(make_pair(
+            Chromosome(it->first, it->second, positions_mom),
+            Chromosome(jt->first, jt->second, positions_dad)));
+    }
+}
+
+
 Organism::Gamete Organism::create_gamete() const
 {
     if (!recombinationPositionGenerator_.get())
         throw runtime_error("[Organism::create_gamete()] No RecombinationPositionGenerator");
-        //recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>(
-        //    new RecombinationPositionGenerator_Trivial);
 
     Gamete result;
 
@@ -109,6 +132,7 @@ Organism::Gamete Organism::create_gamete() const
     {
         vector<unsigned int> positions = 
             recombinationPositionGenerator_->get_positions(it-chromosomePairs_.begin());
+
         result.push_back(Chromosome(it->first, it->second, positions));
     }
 

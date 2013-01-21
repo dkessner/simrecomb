@@ -81,6 +81,7 @@ class Organism
 
     Organism(unsigned int id = 0, size_t chromosomeCount = 1);
     Organism(const Gamete& g1, const Gamete& g2);
+    Organism(const Organism& mom, const Organism& dad);
 
     const ChromosomePairs& chromosomePairs() const {return chromosomePairs_;}
 
