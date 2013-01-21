@@ -183,6 +183,8 @@ Population::Population(const Config& config,
                        const Random& random)
 :   random_(random)
 {
+    organisms_.reserve(config.size);
+
     for (size_t i=0; i<config.size; ++i)
     {
         const MatingDistribution::IndexPair& parentIndices = config.matingDistribution.random_index_pair(random_);
@@ -202,10 +204,7 @@ Population::Population(const Config& config,
 
         const Organism& mom = populations[parentIndices.first]->organisms()[index1];
         const Organism& dad = populations[parentIndices.second]->organisms()[index2];
-
-        Organism::Gamete egg = mom.create_gamete();
-        Organism::Gamete sperm = dad.create_gamete();
-        organisms_.push_back(Organism(egg, sperm));
+        organisms_.push_back(Organism(mom, dad));
     }
 }
 

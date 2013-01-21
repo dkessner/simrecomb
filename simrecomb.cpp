@@ -222,7 +222,8 @@ void simulate(const Config& config)
         current = next;
         ostringstream label;
         label << "gen" << generation;
-        printPopulations(osLog, *current, label.str());
+        //printPopulations(osLog, *current, label.str());
+        osLog << generation << endl;
     }
 
     osLog.close();
