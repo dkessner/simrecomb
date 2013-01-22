@@ -77,6 +77,8 @@ class Organism
 {
     public:
 
+    static boost::shared_ptr<RecombinationPositionGenerator> recombinationPositionGenerator_;
+
     typedef std::vector<Chromosome> Gamete;
 
     Organism(unsigned int id = 0, size_t chromosomeCount = 1);
@@ -87,7 +89,9 @@ class Organism
 
     Gamete create_gamete() const;
 
-    static boost::shared_ptr<RecombinationPositionGenerator> recombinationPositionGenerator_;
+    // binary read/write
+    void read(std::istream& is);
+    void write(std::ostream& os) const;
 
     private:
     ChromosomePairs chromosomePairs_;

@@ -140,6 +140,32 @@ Organism::Gamete Organism::create_gamete() const
 }
 
 
+void Organism::read(istream& is)
+{
+    size_t chromosome_pair_count = 0;
+    is.read((char*)&chromosome_pair_count, sizeof(size_t));
+    if (chromosome_pair_count > 32) throw runtime_error("[Organism::read()] Bad chromosome_pair_count.");
+    chromosomePairs_.resize(chromosome_pair_count);
+    for (ChromosomePairs::iterator it=chromosomePairs_.begin(); it!=chromosomePairs_.end(); ++it)
+    {
+        it->first.read(is);
+        it->second.read(is);
+    }
+}
+
+
+void Organism::write(ostream& os) const
+{
+    size_t chromosome_pair_count = chromosomePairs_.size();
+    os.write((const char*)&chromosome_pair_count, sizeof(size_t));
+    for (ChromosomePairs::const_iterator it=chromosomePairs_.begin(); it!=chromosomePairs_.end(); ++it)
+    {
+        it->first.write(os);
+        it->second.write(os);
+    }
+}
+
+
 bool operator==(const Organism& a, const Organism& b)
 {
     if (a.chromosomePairs().size() != b.chromosomePairs().size())

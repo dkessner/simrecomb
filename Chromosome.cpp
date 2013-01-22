@@ -194,6 +194,7 @@ void Chromosome::read(istream& is)
 {
     size_t block_count = 0;
     is.read((char*)&block_count, sizeof(size_t));
+    if (block_count > 10000) throw runtime_error("[Chromosome::read()] Bad block_count.");
     blocks_.resize(block_count);
     is.read((char*)&blocks_[0], sizeof(DNABlock)*block_count);
 }

@@ -73,6 +73,9 @@ class Chromosome
         operator unsigned int() const;
     };
 
+    // default constructor
+    Chromosome() {}
+
     // new chromosome, with single DNABlock
     Chromosome(unsigned int id); 
 
@@ -93,7 +96,7 @@ class Chromosome
 
     // binary read/write
     void read(std::istream& is);
-    void write(std::ostream& is) const;
+    void write(std::ostream& os) const;
 
     private:
     DNABlocks blocks_;

@@ -283,7 +283,7 @@ void test_construction_parents()
 
     Organism baby(mom, dad);
 
-    if (os_) *os_ << "baby:\n" << baby;
+    if (os_) *os_ << "baby:\n" << baby << endl;
 
     for (size_t i=0; i<6; ++i)
     {
@@ -310,6 +310,49 @@ void test_construction_parents()
 }
 
 
+void test_write_read_binary()
+{
+    if (os_) *os_ << "test_write_read_binary()\n";
+
+    Chromosome::ID id(4, 666, 0, 0);
+    Organism a(id, 3); // chromosomeCount == 3
+    if (os_) *os_ << "a:\n" << a;
+
+    ostringstream oss;
+    a.write(oss);
+
+    Organism b;
+    unit_assert(a != b);
+
+    istringstream iss(oss.str());
+    b.read(iss);
+    if (os_) *os_ << "b:\n" << b;
+    unit_assert(a == b);
+
+    // harder test
+
+    Organism::recombinationPositionGenerator_ = 
+        shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Testing);
+
+    Organism a2(Chromosome::ID(5, 666, 0, 0), 3); // chromosomeCount == 3
+    Organism child(a, a2);
+
+    if (os_) *os_ << "a2:\n" << a2;
+    if (os_) *os_ << "child:\n" << child;
+    
+    ostringstream oss2;
+    child.write(oss2);
+
+    istringstream iss2(oss2.str());
+    Organism child_test;
+    unit_assert(child != child_test);
+
+    child_test.read(iss2);
+    if (os_) *os_ << "child_test:\n" << child_test;
+    unit_assert(child == child_test);
+}
+
+
 void test()
 {
     test_construction();
@@ -320,6 +363,7 @@ void test()
     demo_create_gamete();
     demo_recombination_map();
     test_construction_parents();
+    test_write_read_binary();
 }
 
 
