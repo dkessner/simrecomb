@@ -86,7 +86,7 @@ class Population
     };
 
     // construct an initial Population
-    Population(const Config& config, const Random& random);
+    Population(const Config& config);
 
     // construct a Population from Populations (e.g. from a previous generation)
     Population(const Config& config,
@@ -94,15 +94,14 @@ class Population
                const Random& random);
 
     // construct from file
-    Population(const std::string& filename, const Random& random);
+    Population(const std::string& filename); // TODO: make binary or remove?
 
     const std::vector<Organism>& organisms() const {return organisms_;}
 
-    boost::shared_ptr<Population> randomSubsample(size_t size) const;    
+    boost::shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
 
     private:
 
-    const Random& random_;
     std::vector<Organism> organisms_;
 
     friend std::istream& operator>>(std::istream& is, Population& p);

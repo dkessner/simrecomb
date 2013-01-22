@@ -191,7 +191,7 @@ shared_ptr<Populations> createPopulations(shared_ptr<Populations> current,
     for (vector<Population::Config>::const_iterator it=populationConfigs.begin(); it!=populationConfigs.end(); ++it)
     {
         if (!current.get())
-            result->push_back(shared_ptr<Population>(new Population(*it, random)));
+            result->push_back(shared_ptr<Population>(new Population(*it)));
         else
             result->push_back(shared_ptr<Population>(new Population(*it, *current, random)));
     }

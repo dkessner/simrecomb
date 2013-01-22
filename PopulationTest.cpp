@@ -113,7 +113,7 @@ void testPopulation_initial()
     Population::Config config0;
     config0.size = 10;
     config0.populationID = 0;
-    Population p0(config0, random);
+    Population p0(config0);
     unit_assert(p0.organisms().size() == 10);
     if (os_) *os_ << "p0:\n" << p0 << endl;
 
@@ -122,7 +122,7 @@ void testPopulation_initial()
     config1.populationID = 1;
     config1.idOffset = 1000; // individuals==1000,1001,..., 
     config1.chromosomePairCount = 3;
-    Population p1(config1, random);
+    Population p1(config1);
     unit_assert(p1.organisms().size() == 4);
     if (os_) *os_ << "p1:\n" << p1 << endl;
     if (os_) *os_ << endl;
@@ -146,8 +146,8 @@ void testPopulation_generated()
     config1.size = 10;
     config1.populationID = 1;
 
-    shared_ptr<Population> p0(new Population(config0, random));
-    shared_ptr<Population> p1(new Population(config1, random));
+    shared_ptr<Population> p0(new Population(config0));
+    shared_ptr<Population> p1(new Population(config1));
 
     if (os_) *os_ << "p0:\n" << *p0 << endl;
     if (os_) *os_ << "p1:\n" << *p1 << endl;
@@ -197,7 +197,7 @@ void testPopulationIO()
     Population::Config config;
     config.size = 10;
     config.populationID = 0;
-    Population p(config, random);
+    Population p(config);
     unit_assert(p.organisms().size() == 10);
     if (os_) *os_ << "p:\n" << p << endl;
 
@@ -205,7 +205,7 @@ void testPopulationIO()
     oss << p;
 
     Population::Config config2;
-    Population q(config2, random);
+    Population q(config2);
     unit_assert(p != q);
 
     istringstream iss(oss.str());

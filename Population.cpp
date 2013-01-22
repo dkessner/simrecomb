@@ -167,8 +167,7 @@ istream& operator>>(istream& is, MatingDistribution& md)
 //
 
 
-Population::Population(const Config& config, const Random& random)
-:   random_(random)
+Population::Population(const Config& config)
 {
     for (size_t i=0; i<config.size; ++i)
     {
@@ -181,13 +180,12 @@ Population::Population(const Config& config, const Random& random)
 Population::Population(const Config& config,
                        const Populations& populations,
                        const Random& random)
-:   random_(random)
 {
     organisms_.reserve(config.size);
 
     for (size_t i=0; i<config.size; ++i)
     {
-        const MatingDistribution::IndexPair& parentIndices = config.matingDistribution.random_index_pair(random_);
+        const MatingDistribution::IndexPair& parentIndices = config.matingDistribution.random_index_pair(random);
 
         if (max(parentIndices.first,parentIndices.second) >= populations.size())
             throw runtime_error("[Population::Population()] Indices out of bounds.");
@@ -196,10 +194,10 @@ Population::Population(const Config& config,
             populations[parentIndices.second]->organisms().empty())
             throw runtime_error("[Population::Population()] Empty population.");
 
-        size_t index1 = random_.randint(0, populations[parentIndices.first]->organisms().size()-1);
+        size_t index1 = random.randint(0, populations[parentIndices.first]->organisms().size()-1);
         size_t index2 = 0;
         do { // avoid selfing
-            index2 = random_.randint(0, populations[parentIndices.second]->organisms().size()-1);
+            index2 = random.randint(0, populations[parentIndices.second]->organisms().size()-1);
         } while (parentIndices.first == parentIndices.second && index1 == index2);
 
         const Organism& mom = populations[parentIndices.first]->organisms()[index1];
@@ -209,8 +207,7 @@ Population::Population(const Config& config,
 }
 
 
-Population::Population(const std::string& filename, const Random& random)
-:   random_(random)
+Population::Population(const std::string& filename)
 {
     ifstream is(filename.c_str());
     if (!is)
@@ -223,16 +220,16 @@ Population::Population(const std::string& filename, const Random& random)
 }
 
 
-shared_ptr<Population> Population::randomSubsample(size_t size) const
+shared_ptr<Population> Population::randomSubsample(size_t size, Random& random) const
 {
     if (size > organisms_.size())
         throw runtime_error("[Population::randomSubsample] Sample size exceeds population size.");
 
     set<size_t> indices;
     while (indices.size() < size) // may take a long time if size is close to organisms_.size()
-        indices.insert(random_.randint(0,organisms_.size()-1));
+        indices.insert(random.randint(0,organisms_.size()-1));
 
-    shared_ptr<Population> subsample(new Population(Config(), random_));
+    shared_ptr<Population> subsample(new Population(Config()));
 
     for (set<size_t>::const_iterator it=indices.begin(); it!=indices.end(); ++it)
         subsample->organisms_.push_back(organisms_[*it]);

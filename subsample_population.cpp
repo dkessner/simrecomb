@@ -50,7 +50,7 @@ void subsamplePopulation(const Config& config)
     Random random;
 
     Population::Config dummy;
-    Population p(dummy, random);
+    Population p(dummy);
     bfs::ifstream is(config.filename);
 
     cout << "Reading population data.\n";
@@ -61,7 +61,7 @@ void subsamplePopulation(const Config& config)
 
     for (size_t i=0; i<config.replicateCount; i++)
     {
-        shared_ptr<Population> subsample = p.randomSubsample(config.sampleSize);
+        shared_ptr<Population> subsample = p.randomSubsample(config.sampleSize, random);
 
         ostringstream filename;
         filename << "subsample_" << config.sampleSize << "_" << i << ".txt";

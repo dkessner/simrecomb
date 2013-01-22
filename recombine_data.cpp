@@ -100,7 +100,7 @@ void recombineData(const Config& config)
     Random random;
 
     cout << "Reading population data.\n";
-    Population population(config.populationFilename, random);
+    Population population(config.populationFilename);
     cout << "Population size: " << population.organisms().size() << endl;
 
     MSFormat ms1(config.msFilename1);
