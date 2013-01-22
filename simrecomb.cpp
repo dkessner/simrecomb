@@ -16,6 +16,7 @@
 //   limitations under the License.
 //
 
+
 #include "Population.hpp"
 #include <iostream>
 #include <cstring>
@@ -103,14 +104,6 @@ istream& operator>>(istream& is, SimulationConfig& simulationConfig)
 }
 
 
-struct Config
-{
-    bfs::path configFilename;
-    bfs::path outputDirectory;
-    SimulationConfig simulationConfig;
-};
-
-
 void printPopulations(ostream& os, const Populations& populations, const string& label)
 {
     os << "<" << label << ">\n";
@@ -124,7 +117,7 @@ void printPopulations(ostream& os, const Populations& populations, const string&
 }
 
 
-void initializeDefaultSimulationConfig(SimulationConfig& simulationConfig)
+void initializeExampleSimulationConfig(SimulationConfig& simulationConfig)
 {
     const size_t chromosomePairCount_ = 3;
     const unsigned int populationSize_ = 10000;
@@ -174,11 +167,11 @@ void initializeDefaultSimulationConfig(SimulationConfig& simulationConfig)
 }
 
 
-void initializeRecombinationMaps(const Config& config, const Random& random)
+void initializeRecombinationMaps(const SimulationConfig& simulationConfig, const Random& random)
 {
     Organism::recombinationPositionGenerator_ =
         shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_RecombinationMap(config.simulationConfig.geneticMapFilenames, random));
+            new RecombinationPositionGenerator_RecombinationMap(simulationConfig.geneticMapFilenames, random));
 }
 
 
@@ -200,25 +193,25 @@ shared_ptr<Populations> createPopulations(shared_ptr<Populations> current,
 }
 
 
-void simulate(const Config& config)
+void simulate(const SimulationConfig& simulationConfig, bfs::path outputDirectory)
 {
-    bfs::ofstream osSimulationConfig(config.outputDirectory / "simrecomb_config.txt");
-    osSimulationConfig << config.simulationConfig;
+    bfs::ofstream osSimulationConfig(outputDirectory / "simrecomb_config.txt");
+    osSimulationConfig << simulationConfig;
     osSimulationConfig.close();
 
-    Random random(config.simulationConfig.seed);
+    Random random(simulationConfig.seed);
 
     cout << "Initializing recombination maps.\n";
-    initializeRecombinationMaps(config, random);
+    initializeRecombinationMaps(simulationConfig, random);
 
-    bfs::ofstream osLog(config.outputDirectory / "log.txt");
+    bfs::ofstream osLog(outputDirectory / "log.txt");
 
     shared_ptr<Populations> current;
-    for (size_t generation=0; generation<config.simulationConfig.populationConfigs.size(); generation++)
+    for (size_t generation=0; generation<simulationConfig.populationConfigs.size(); generation++)
     {
         cout << "Generation " << generation << endl;
         shared_ptr<Populations> next = 
-            createPopulations(current, config.simulationConfig.populationConfigs[generation], random);
+            createPopulations(current, simulationConfig.populationConfigs[generation], random);
         current = next;
         ostringstream label;
         label << "gen" << generation;
@@ -234,58 +227,9 @@ void simulate(const Config& config)
     {
         ostringstream filename;
         filename << "pop" << i << ".txt"; 
-        bfs::ofstream os_pop(config.outputDirectory / filename.str());
+        bfs::ofstream os_pop(outputDirectory / filename.str());
         os_pop << *(*current)[i];
     }
-}
-
-
-Config parseCommandLine(int argc, char* argv[])
-{
-    if (argc==2 && !strcmp(argv[1],"default"))
-    {
-        SimulationConfig temp;
-        initializeDefaultSimulationConfig(temp);
-        cout << temp;
-        exit(0);
-    }
-
-    if (argc != 3)
-    {
-        cout << "Usage: simrecomb <config_filename> <outputdir>\n";
-        cout << "   or: simrecomb default (prints default config to stdout)\n";
-        cout << "\n";
-        cout << "Darren Kessner\n";
-        cout << "John Novembre Lab, UCLA\n";
-        throw runtime_error("");
-    }
-
-    Config config;
-    config.configFilename = argv[1];
-    config.outputDirectory = argv[2];
-
-    if (!bfs::exists(config.configFilename))
-    {
-        ostringstream oss;
-        oss << "Config file not found: " << config.configFilename;
-        throw runtime_error(oss.str());
-    }
-
-    if (bfs::exists(config.outputDirectory))
-    {
-        ostringstream oss;
-        oss << "File/directory already exists: " << config.outputDirectory;
-        throw runtime_error(oss.str());
-    }
-
-    cout << "Reading configuration file " << config.configFilename << endl;
-    bfs::ifstream is(config.configFilename);
-    is >> config.simulationConfig;
-    is.close();
-
-    bfs::create_directories(config.outputDirectory);
-
-    return config;
 }
 
 
@@ -293,8 +237,88 @@ int main(int argc, char* argv[])
 {
     try
     {
-        Config config = parseCommandLine(argc, argv); 
-        simulate(config);
+        ostringstream usage;
+        usage << "Usage: simrecomb <subfunction> [args]\n";
+        usage << endl;
+        usage << "Print example config file to stdout:\n";
+        usage << "       simrecomb example\n";
+        usage << endl;
+        usage << "Run simulation:\n";
+        usage << "       simrecomb sim <config_filename> <outputdir>\n";
+        usage << endl;
+        usage << "Darren Kessner\n";
+        usage << "John Novembre Lab, UCLA\n";
+
+        string subfunction = argc>1 ? argv[1] : "";
+
+        if (subfunction == "sim")
+        {
+            if (argc < 4) throw runtime_error(usage.str().c_str());
+                
+            string configFilename = argv[2];
+            string outputDirectory = argv[3];
+
+            if (!bfs::exists(configFilename))
+                throw runtime_error(("[simrecomb] Config file not found: " + configFilename).c_str());
+
+            if (bfs::exists(outputDirectory))
+                throw runtime_error(("[simrecomb] Directory exists: " + outputDirectory).c_str());
+
+            cout << "Reading configuration file " << configFilename << endl;
+            bfs::ifstream is(configFilename);
+            SimulationConfig simulationConfig;
+            is >> simulationConfig;
+            is.close();
+
+            bfs::create_directories(outputDirectory);
+
+            simulate(simulationConfig, outputDirectory);
+        }
+        else if (subfunction == "example")
+        {
+            SimulationConfig temp;
+            initializeExampleSimulationConfig(temp);
+            cout << temp;
+        }
+        else if (subfunction == "txt2pop")
+        {
+            if (argc < 4) throw runtime_error(usage.str().c_str());
+            string filename_in = argv[2];
+            string filename_out = argv[3];
+
+            cout << "reading " << filename_in << endl << flush;
+            ifstream is(filename_in.c_str());
+            if (!is) throw runtime_error(("[simrecomb] Unable to open file " + filename_in).c_str());
+            Population p;
+            is >> p;
+
+            cout << "writing " << filename_out << endl << flush;
+            ofstream os(filename_out.c_str(), ios::binary);
+            p.write(os);
+            os.close();
+        }
+        else if (subfunction == "pop2txt")
+        {
+            if (argc < 4) throw runtime_error(usage.str().c_str());
+            string filename_in = argv[2];
+            string filename_out = argv[3];
+
+            cout << "reading " << filename_in << endl << flush;
+            ifstream is(filename_in.c_str(), ios::binary);
+            if (!is) throw runtime_error(("[simrecomb] Unable to open file " + filename_in).c_str());
+            Population p;
+            p.read(is);
+
+            cout << "writing " << filename_out << endl << flush;
+            ofstream os(filename_out.c_str());
+            os << p;
+            os.close();
+        }
+        else
+        {
+            throw runtime_error(usage.str().c_str());
+        }
+
         return 0;
     }
     catch(exception& e)
