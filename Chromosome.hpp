@@ -91,6 +91,10 @@ class Chromosome
     // append blocks (from position_begin to position_end) to result
     void extract_blocks(unsigned int position_begin, unsigned int position_end, DNABlocks& result) const;
 
+    // binary read/write
+    void read(std::istream& is);
+    void write(std::ostream& is) const;
+
     private:
     DNABlocks blocks_;
 };

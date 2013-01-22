@@ -28,6 +28,7 @@ using namespace std;
 
 
 ostream* os_ = 0;
+//ostream* os_ = &cout;
 
 
 void test_DNABlock() 
@@ -568,6 +569,32 @@ void test_recombine_4()
 }
 
 
+void test_write_read_binary()
+{
+    if (os_) *os_ << "test_write_read_binary()\n";
+
+    DNABlocks blocks;
+    for (unsigned int i=0; i<10; i++)
+        blocks.push_back(DNABlock(i*1000, i));
+
+    Chromosome a(blocks);
+    if (os_) *os_ << "a: " << a << endl;
+
+    ostringstream oss;
+    a.write(oss);
+
+    istringstream iss(oss.str());
+    Chromosome b(0);
+    unit_assert(a != b);
+
+    b.read(iss);
+    if (os_) *os_ << "b: " << b << endl;
+    unit_assert(a == b);
+
+    if (os_) *os_ << endl;
+}
+
+
 void test()
 {
     test_DNABlock();
@@ -582,6 +609,7 @@ void test()
     test_recombine_2();
     test_recombine_3();
     test_recombine_4();
+    test_write_read_binary();
 }
 
 

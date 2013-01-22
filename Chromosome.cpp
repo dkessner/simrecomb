@@ -190,6 +190,23 @@ void Chromosome::extract_blocks(unsigned int position_begin,
 }
 
 
+void Chromosome::read(istream& is)
+{
+    size_t block_count = 0;
+    is.read((char*)&block_count, sizeof(size_t));
+    blocks_.resize(block_count);
+    is.read((char*)&blocks_[0], sizeof(DNABlock)*block_count);
+}
+
+
+void Chromosome::write(ostream& os) const
+{
+    size_t block_count = blocks_.size();
+    os.write((const char*)&block_count, sizeof(size_t));
+    os.write((const char*)&blocks_[0], sizeof(DNABlock)*block_count);
+}
+
+
 bool operator==(const Chromosome& a, const Chromosome& b)
 {
     if (a.blocks().size() != b.blocks().size()) return false;
