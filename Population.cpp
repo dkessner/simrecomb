@@ -240,6 +240,26 @@ shared_ptr<Population> Population::randomSubsample(size_t size, Random& random) 
 }
 
 
+void Population::read(istream& is)
+{
+    size_t organism_count = 0;
+    is.read((char*)&organism_count, sizeof(size_t));
+    if (organism_count > 1e8) throw runtime_error("[Population::read()] Bad organism count.");
+    organisms_.resize(organism_count);
+    for (Organisms::iterator it=organisms_.begin(); it!=organisms_.end(); ++it)
+        it->read(is);
+}
+
+
+void Population::write(ostream& os) const
+{
+    size_t organism_count = organisms_.size();
+    os.write((const char*)&organism_count, sizeof(size_t));
+    for (Organisms::const_iterator it=organisms_.begin(); it!=organisms_.end(); ++it)
+        it->write(os);
+}
+
+
 bool operator==(const Population::Config& a, const Population::Config& b)
 {
     return a.size == b.size &&

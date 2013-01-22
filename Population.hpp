@@ -93,9 +93,6 @@ class Population
                const Populations& populations,
                const Random& random);
 
-    // construct from file
-    //Population(const std::string& filename); // TODO: make binary or remove?
-
     const std::vector<Organism>& organisms() const {return organisms_;}
 
     boost::shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
@@ -106,7 +103,7 @@ class Population
 
     private:
 
-    std::vector<Organism> organisms_;
+    Organisms organisms_;
 
     friend std::istream& operator>>(std::istream& is, Population& p);
 };

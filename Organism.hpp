@@ -98,6 +98,9 @@ class Organism
 };
 
 
+typedef std::vector<Organism> Organisms;
+
+
 bool operator==(const Organism& a, const Organism& b);
 bool operator!=(const Organism& a, const Organism& b);
 std::ostream& operator<<(std::ostream& os, const Organism& o);

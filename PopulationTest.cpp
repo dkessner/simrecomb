@@ -221,6 +221,35 @@ void testPopulationIO()
 }
 
 
+void testPopulationIO_Binary()
+{
+    if (os_) *os_ << "testPopulationIO_Binary()\n";
+
+    Random random;
+
+    Population::Config config;
+    config.size = 10;
+    config.populationID = 0;
+    config.chromosomePairCount = 1;
+    Population p(config);
+    unit_assert(p.organisms().size() == 10);
+    if (os_) *os_ << "p:\n" << p << endl;
+
+    ostringstream oss;
+    p.write(oss);
+
+    Population q;
+    unit_assert(p != q);
+
+    istringstream iss(oss.str());
+    q.read(iss);
+    if (os_) *os_ << "q:\n" << q << endl;
+    unit_assert(p == q);
+
+    if (os_) *os_ << endl;
+}
+
+
 void test()
 {
     testMatingDistribution();
@@ -228,6 +257,7 @@ void test()
     testPopulation_generated();
     testPopulationConfigIO();
     testPopulationIO();
+    testPopulationIO_Binary();
 }
 
 
