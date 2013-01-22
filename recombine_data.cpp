@@ -100,7 +100,14 @@ void recombineData(const Config& config)
     Random random;
 
     cout << "Reading population data.\n";
-    Population population(config.populationFilename);
+    //Population population(config.populationFilename);
+    Population population;
+    ifstream is(config.populationFilename.c_str());
+    if (!is) throw runtime_error(("[Population] Unable to open file " + config.populationFilename).c_str());
+    is >> population;
+    if (population.organisms().empty())
+        cerr << "[Population] Warning: no population data read from file " << config.populationFilename << endl;
+
     cout << "Population size: " << population.organisms().size() << endl;
 
     MSFormat ms1(config.msFilename1);

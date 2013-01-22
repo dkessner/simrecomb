@@ -207,6 +207,7 @@ Population::Population(const Config& config,
 }
 
 
+/*
 Population::Population(const std::string& filename)
 {
     ifstream is(filename.c_str());
@@ -218,6 +219,7 @@ Population::Population(const std::string& filename)
     if (organisms_.empty())
         cerr << "[Population] Warning: no population data read from file " << filename << endl;
 }
+*/
 
 
 shared_ptr<Population> Population::randomSubsample(size_t size, Random& random) const

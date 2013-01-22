@@ -81,12 +81,12 @@ class Population
         MatingDistribution matingDistribution;
 
         Config() 
-        :   size(0), populationID(0), idOffset(0), chromosomePairCount(1)
+        :   size(0), populationID(0), idOffset(0), chromosomePairCount(0)
         {}
     };
 
     // construct an initial Population
-    Population(const Config& config);
+    Population(const Config& config = Config());
 
     // construct a Population from Populations (e.g. from a previous generation)
     Population(const Config& config,
@@ -94,11 +94,15 @@ class Population
                const Random& random);
 
     // construct from file
-    Population(const std::string& filename); // TODO: make binary or remove?
+    //Population(const std::string& filename); // TODO: make binary or remove?
 
     const std::vector<Organism>& organisms() const {return organisms_;}
 
     boost::shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
+
+    // binary read/write
+    void read(std::istream& is);
+    void write(std::ostream& os) const;
 
     private:
 

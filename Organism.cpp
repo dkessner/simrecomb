@@ -187,6 +187,8 @@ bool operator!=(const Organism& a, const Organism& b)
 
 ostream& operator<<(ostream& os, const Organism& o)
 {
+    if (o.chromosomePairs().empty()) throw runtime_error("[Organism::operator<<] No chromosome pairs.");
+
     for (ChromosomePairs::const_iterator it=o.chromosomePairs().begin(); it!=o.chromosomePairs().end(); ++it)
         os << "+ " << it->first << "\n- " << it->second << endl;
     return os;
