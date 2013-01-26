@@ -45,6 +45,7 @@ lib libsimrecomb :
     Population.cpp
     Random.cpp 
     RecombinationMap.cpp 
+    Genotyper.cpp
     ;
 
 
@@ -53,6 +54,7 @@ unit-test OrganismTest : OrganismTest.cpp libsimrecomb ;
 unit-test PopulationTest : PopulationTest.cpp libsimrecomb ;
 unit-test RandomTest : RandomTest.cpp libsimrecomb ;
 unit-test RecombinationMapTest : RecombinationMapTest.cpp libsimrecomb ;
+unit-test GenotyperTest : GenotyperTest.cpp libsimrecomb ;
 
 
 run MSFormatTest.cpp libsimrecomb
