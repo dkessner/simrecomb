@@ -18,10 +18,14 @@
 
 #include "Chromosome.hpp"
 #include "unit.hpp"
+#include <boost/static_assert.hpp>
 #include <iostream>
 #include <map>
 #include <cstring>
 #include <algorithm>
+
+
+BOOST_STATIC_ASSERT(sizeof(DNABlock) == 8); // make sure int is 32-bit
 
 
 using namespace std;
