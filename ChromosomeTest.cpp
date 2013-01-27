@@ -599,6 +599,47 @@ void test_write_read_binary()
 }
 
 
+void test_find_block()
+{
+    if (os_) *os_ << "test_find_block()\n";
+
+    DNABlocks blocks;
+    blocks.push_back(DNABlock(0, 0));
+    blocks.push_back(DNABlock(50000, 1));
+    blocks.push_back(DNABlock(100000, 0));
+    blocks.push_back(DNABlock(100001, 1));
+    blocks.push_back(DNABlock(200000, 0));
+
+    Chromosome chr(blocks);
+
+    if (os_) *os_ << chr << endl;
+
+    const DNABlock& found_0 = chr.find_block(0);
+    if (os_) *os_ << "found_0: " << found_0 << endl;
+    unit_assert(found_0.position == 0);
+
+    const DNABlock& found_75k = chr.find_block(75000);
+    if (os_) *os_ << "found_75k: " << found_75k << endl;
+    unit_assert(found_75k.position == 50000);
+
+    const DNABlock& found_100k = chr.find_block(100000);
+    if (os_) *os_ << "found_100k: " << found_100k << endl;
+    unit_assert(found_100k.position == 100000);
+
+    const DNABlock& found_100k1 = chr.find_block(100001);
+    if (os_) *os_ << "found_100k1: " << found_100k1 << endl;
+    unit_assert(found_100k1.position == 100001);
+
+    const DNABlock& found_200k = chr.find_block(200000);
+    if (os_) *os_ << "found_200k: " << found_200k << endl;
+    unit_assert(found_200k.position == 200000);
+
+    const DNABlock& found_300k = chr.find_block(300000);
+    if (os_) *os_ << "found_300k: " << found_300k << endl;
+    unit_assert(found_300k.position == 200000);
+}
+
+
 void test()
 {
     test_DNABlock();
@@ -614,6 +655,7 @@ void test()
     test_recombine_3();
     test_recombine_4();
     test_write_read_binary();
+    test_find_block();
 }
 
 

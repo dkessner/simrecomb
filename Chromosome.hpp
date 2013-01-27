@@ -94,6 +94,9 @@ class Chromosome
     // append blocks (from position_begin to position_end) to result
     void extract_blocks(unsigned int position_begin, unsigned int position_end, DNABlocks& result) const;
 
+    // find the block containing a position
+    const DNABlock& find_block(unsigned int position, size_t index_begin = 0);
+
     // binary read/write
     void read(std::istream& is);
     void write(std::ostream& os) const;

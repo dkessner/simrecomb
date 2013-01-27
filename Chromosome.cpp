@@ -190,6 +190,27 @@ void Chromosome::extract_blocks(unsigned int position_begin,
 }
 
 
+namespace
+{
+
+struct ComparePosition
+{
+    bool operator()(const DNABlock& a, const DNABlock& b) const {return a.position < b.position;}
+};
+
+} // namespace
+
+
+const DNABlock& Chromosome::find_block(unsigned int position, size_t index_begin)
+{
+    if (index_begin >= blocks_.size()) throw runtime_error("[Chromosome::find_block()] Bad index_begin.");
+
+    DNABlocks::const_iterator it = upper_bound(blocks_.begin() + index_begin, blocks_.end(), 
+                                               DNABlock(position, 0), ComparePosition()); // returns first block with higher position
+    return *(it-1);
+}
+
+
 void Chromosome::read(istream& is)
 {
     size_t block_count = 0;
