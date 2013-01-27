@@ -40,21 +40,23 @@ lib boost_filesystem ;
 
 lib libsimrecomb :
     Chromosome.cpp 
+    Genotyper.cpp
     MSFormat.cpp
     Organism.cpp 
     Population.cpp
-    Random.cpp 
+    PopulationAnalyzer.cpp
     RecombinationMap.cpp 
-    Genotyper.cpp
+    Random.cpp 
     ;
 
 
 unit-test ChromosomeTest : ChromosomeTest.cpp libsimrecomb ;
+unit-test GenotyperTest : GenotyperTest.cpp libsimrecomb ;
 unit-test OrganismTest : OrganismTest.cpp libsimrecomb ;
 unit-test PopulationTest : PopulationTest.cpp libsimrecomb ;
+unit-test PopulationAnalyzerTest : PopulationAnalyzerTest.cpp libsimrecomb ;
 unit-test RandomTest : RandomTest.cpp libsimrecomb ;
 unit-test RecombinationMapTest : RecombinationMapTest.cpp libsimrecomb ;
-unit-test GenotyperTest : GenotyperTest.cpp libsimrecomb ;
 
 
 run MSFormatTest.cpp libsimrecomb
