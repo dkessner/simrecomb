@@ -201,7 +201,7 @@ struct ComparePosition
 } // namespace
 
 
-const DNABlock& Chromosome::find_block(unsigned int position, size_t index_begin)
+const DNABlock& Chromosome::find_block(unsigned int position, size_t index_begin) const
 {
     if (index_begin >= blocks_.size()) throw runtime_error("[Chromosome::find_block()] Bad index_begin.");
 

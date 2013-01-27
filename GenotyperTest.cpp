@@ -25,8 +25,8 @@
 using namespace std;
 
 
-//ostream* os_ = 0;
-ostream* os_ = &cout;
+ostream* os_ = 0;
+//ostream* os_ = &cout;
 
 
 class SNPIndicator_Test : public SNPIndicator
@@ -64,8 +64,8 @@ void test_genotype_easy()
              << "genotype_dad: " << genotype_dad << endl;
     }
 
-    //unit_assert(genotype_mom == 0);
-    //unit_assert(genotype_dad == 2);
+    unit_assert(genotype_mom == 0);
+    unit_assert(genotype_dad == 2);
 }
 
 
@@ -119,9 +119,9 @@ void test_genotype_harder()
              << "genotype_hetero: " << genotype_hetero << endl;
     }
 
-    //unit_assert(genotype_homo1 == 0);
-    //unit_assert(genotype_homo2 == 2);
-    //unit_assert(genotype_hetero == 1);
+    unit_assert(genotype_homo1 == 0);
+    unit_assert(genotype_homo2 == 2);
+    unit_assert(genotype_hetero == 1);
 }
 
 

@@ -23,8 +23,12 @@
 unsigned int Genotyper::genotype(const Organism& organism, size_t chromosome_pair_index,
                                  unsigned int position, const SNPIndicator& indicator) const
 {
-    return 0;    
-}
+    const ChromosomePair& cp = organism.chromosomePairs()[chromosome_pair_index];
+    const DNABlock& block0 = cp.first.find_block(position);
+    const DNABlock& block1 = cp.second.find_block(position);
+    return indicator(position, block0.id) + indicator(position, block1.id);
 
+    // TODO: add support for parallel iteration with a block index
+}
 
 
