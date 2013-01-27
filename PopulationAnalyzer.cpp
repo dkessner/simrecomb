@@ -22,6 +22,11 @@
 
 shared_ptr<PopulationData> PopulationAnalyzer::analyze(const Population& population) const
 {
-     return shared_ptr<PopulationData>();
+    return shared_ptr<PopulationData>();
+
+    // get loci to genotype from QT list
+    // call Genotyper, get genotype data vectors
+    // calculate each QT
+    // call fitness function
 }
 
