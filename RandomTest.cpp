@@ -29,6 +29,7 @@ using namespace std;
 
 
 ostream* os_ = 0;
+//ostream* os_ = &cout;
 
 
 void test()

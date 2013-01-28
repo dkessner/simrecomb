@@ -52,11 +52,18 @@ void Random::seed(unsigned int value)
 
 int Random::randint(int a, int b) const
 {
+/*   
     // not sure if instantiation of these objects takes longer than doing this ourselves
     boost::uniform_int<> dist(a,b); // distribution
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> >
         vg(impl_->rng, dist); // glues generator to distribution 
     return vg();
+*/
+
+    double t = impl_->random_01();
+    int result = a + int(t*(b+1-a));
+    if (result == b+1) throw runtime_error("[Random::randint()] This isn't happening.");
+    return result;
 }
 
 
