@@ -189,6 +189,7 @@ inline size_t random_organism_index(const Population& p, const Random& random)
 
 Population::Population(const Config& config,
                        const Populations& populations,
+                       const DataVectorPtrs& fitnesses,
                        const Random& random)
 {
     organisms_.reserve(config.size);

@@ -177,6 +177,7 @@ void initializeRecombinationMaps(const SimulationConfig& simulationConfig, const
 
 shared_ptr<Populations> createPopulations(shared_ptr<Populations> current, 
                                           const vector<Population::Config>& populationConfigs,
+                                          const DataVectorPtrs& fitnesses,
                                           const Random& random)
 {
     shared_ptr<Populations> result(new Populations);
@@ -186,7 +187,7 @@ shared_ptr<Populations> createPopulations(shared_ptr<Populations> current,
         if (!current.get())
             result->push_back(shared_ptr<Population>(new Population(*it)));
         else
-            result->push_back(shared_ptr<Population>(new Population(*it, *current, random)));
+            result->push_back(shared_ptr<Population>(new Population(*it, *current, fitnesses, random)));
     }
 
     return result; 
@@ -206,12 +207,15 @@ void simulate(const SimulationConfig& simulationConfig, bfs::path outputDirector
 
     bfs::ofstream osLog(outputDirectory / "log.txt");
 
+    const size_t population_count = simulationConfig.populationConfigs.size();
+    DataVectorPtrs dummy_fitnesses(population_count);
+
     shared_ptr<Populations> current;
-    for (size_t generation=0; generation<simulationConfig.populationConfigs.size(); generation++)
+    for (size_t generation=0; generation<population_count; generation++)
     {
         cout << "Generation " << generation << endl;
         shared_ptr<Populations> next = 
-            createPopulations(current, simulationConfig.populationConfigs[generation], random);
+            createPopulations(current, simulationConfig.populationConfigs[generation], dummy_fitnesses, random);
         current = next;
         ostringstream label;
         label << "gen" << generation;

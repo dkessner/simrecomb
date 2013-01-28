@@ -20,6 +20,7 @@
 #define _POPULATION_HPP_
 
 
+#include "DataVector.hpp"
 #include "Organism.hpp"
 #include "boost/shared_ptr.hpp"
 #include <vector>
@@ -91,6 +92,7 @@ class Population
     // construct a Population from Populations (e.g. from a previous generation)
     Population(const Config& config,
                const Populations& populations,
+               const DataVectorPtrs& fitnesses,
                const Random& random);
 
     const std::vector<Organism>& organisms() const {return organisms_;}

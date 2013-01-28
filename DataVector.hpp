@@ -31,6 +31,7 @@ using boost::shared_ptr;
 
 class DataVector;
 typedef shared_ptr<DataVector> DataVectorPtr;
+typedef std::vector<DataVectorPtr> DataVectorPtrs;
 
 
 class DataVector : public std::vector<double>

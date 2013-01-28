@@ -167,8 +167,9 @@ void testPopulation_generated()
     config_nextgen.matingDistribution.push_back(.3, make_pair(1,0));
     config_nextgen.matingDistribution.push_back(.2, make_pair(1,1));
 
+    DataVectorPtrs dummy_fitnesses;
 
-    Population nextgen(config_nextgen, populations, random);
+    Population nextgen(config_nextgen, populations, dummy_fitnesses, random);
     if (os_) *os_ << "nextgen:\n" << nextgen << endl;
 
     int count00 = 0;
