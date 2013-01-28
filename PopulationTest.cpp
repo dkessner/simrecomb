@@ -258,29 +258,24 @@ void testPopulation_fitness_constructor()
 {
     if (os_) *os_ << "testPopulation_fitness_constructor()\n";
 
+    // create a new population
+
+    const size_t N = 1000;
+
     Population::Config config0;
-    config0.size = 200;
+    config0.size = 2 * N;
     config0.chromosomePairCount = 1;
 
     PopulationPtr p0(new Population(config0));
-    cout << "p.size(): " << p0->organisms().size() << endl;
 
     Populations populations;
     populations.push_back(p0);
 
-    /*
-    for (Organisms::const_iterator it=p.organisms().begin(); it!=p.organisms().end(); ++it)
-        cout << it->chromosomePairs()[0].first.blocks()[0] << " " 
-             << it->chromosomePairs()[0].second.blocks()[0] << endl;
-     */
+    // fitness vector:  (1, ..., 1, 2, ..., 2)
 
     DataVectorPtr fitness_vector(new DataVector(config0.size));
-    for (size_t i=0; i<config0.size/2; ++i) fitness_vector->at(i) = 1;
-    for (size_t i=config0.size/2; i<config0.size; ++i) fitness_vector->at(i) = 2;
-
-    cout << "fitness vector: " << fitness_vector->size() << endl;
-    copy(fitness_vector->begin(), fitness_vector->end(), ostream_iterator<double>(cout, " "));
-    cout << endl;
+    for (size_t i=0; i<N; ++i) fitness_vector->at(i) = 1;
+    for (size_t i=N; i<2*N; ++i) fitness_vector->at(i) = 2;
 
     DataVectorPtrs fitnesses;
     fitnesses.push_back(fitness_vector);
@@ -289,41 +284,51 @@ void testPopulation_fitness_constructor()
 
     Population::Config config1;
     config1.size = config0.size;
-    config1.matingDistribution.push_back(1, make_pair(0,0));
+    config1.matingDistribution.push_back(1, make_pair(0,0)); // random mating
 
-    cout << flush;
-
-    //cout << "recomb gen: " << Organism::recombinationPositionGenerator_ << endl << flush;
     Organism::recombinationPositionGenerator_ = 
         shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Trivial(random));
 
     Population p1(config1, populations, fitnesses, random);
-
-    cout << "p1 size:" << p1.organisms().size() << endl;
+    unit_assert(p1.organisms().size() == 2*N);
 
     size_t count1 = 0;
     size_t count2 = 0;
 
     for (Organisms::const_iterator it=p1.organisms().begin(); it!=p1.organisms().end(); ++it)
     {
-        cout << it->chromosomePairs()[0].first.blocks()[0] << " " 
-             << it->chromosomePairs()[0].second.blocks()[0] << endl;
+        // cout << *it << endl; 
 
-        if (Chromosome::ID(it->chromosomePairs()[0].first.blocks()[0].id).individual < config0.size/2) 
+        // TODO: accessing ids should be easier
+        unsigned int individual1 = Chromosome::ID(it->chromosomePairs()[0].first.blocks()[0].id).individual;
+        unsigned int individual2 = Chromosome::ID(it->chromosomePairs()[0].second.blocks()[0].id).individual;
+
+        if (individual1 < N) 
             count1++;
         else
             count2++;
 
-        if (Chromosome::ID(it->chromosomePairs()[0].second.blocks()[0].id).individual < config0.size/2) 
+        if (individual2 < N) 
             count1++;
         else
             count2++;
     }
 
-    cout << "count1: " << count1 << endl;
-    cout << "count2: " << count2 << endl;
+    double ratio = double(count1)/count2;
 
-    Organism::recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>();
+    if (os_)
+    {
+        *os_ << "count1: " << count1 << endl
+             << "count2: " << count2 << endl
+             << "ratio: " << ratio << endl;
+    }
+
+    unit_assert_equal(ratio, .5, .02); // count1:count2 should be close to 1:2
+
+    // reset: was seeing some weirdness (segfaults) that appeared to be due to bad memory related 
+    // to the static reference Organism::recombinationPositionGenerator_ from unit test
+    // testPopulation_generated()
+    Organism::recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>(); 
 }
 
 

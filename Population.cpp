@@ -188,25 +188,40 @@ class RandomOrganismIndexGenerator
                                  const DataVectorPtr& fitness_vector,
                                  const Random& random)
     :   population_size_(p.organisms().size()),
+        fitness_cdf_max_(0),
         random_(random)
     {
         if (fitness_vector.get()) 
+        {
             fitness_cdf_ = fitness_vector->cdf(); // memory allocation for cdf
+
+            if (!fitness_cdf_.get() || fitness_cdf_->empty() || fitness_cdf_->size() != population_size_)
+                throw runtime_error("[RandomOrganismIndexGenerator] This isn't happening.");
+
+            fitness_cdf_max_ = fitness_cdf_->back();
+        }
     }
 
     size_t operator()() const
     {
         if (!fitness_cdf_.get()) 
-            return random_.randint(0, population_size_-1);
+        {
+            return random_.randint(0, population_size_-1); // uniform random index
+        }
         else
-            return random_.randint(0, population_size_-1);
-            //throw runtime_error("TODO: not implemented yet");
+        {
+            // pick random index according to fitnesses
+            double roll = random_.uniform(0, fitness_cdf_max_);
+            DataVector::const_iterator it = lower_bound(fitness_cdf_->begin(), fitness_cdf_->end(), roll);
+            return it - fitness_cdf_->begin();
+        }
     }
 
     private:
 
     size_t population_size_;
     DataVectorPtr fitness_cdf_;
+    double fitness_cdf_max_;
     const Random& random_;
 };
 
