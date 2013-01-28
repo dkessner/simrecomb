@@ -29,7 +29,7 @@ project simrecomb
         <warnings-as-errors>on
         <warnings>all
         #<variant>profile
-        <variant>release
+        #<variant>release
         #<threading>multi
     ;
 

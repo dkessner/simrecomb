@@ -26,6 +26,9 @@
 #include <vector>
 
 
+using boost::shared_ptr;
+
+
 class MatingDistribution
 {
     public:
@@ -62,7 +65,8 @@ std::istream& operator>>(std::istream& is, MatingDistribution& md);
 
 
 class Population;
-typedef std::vector< boost::shared_ptr<Population> > Populations;
+typedef shared_ptr<Population> PopulationPtr;
+typedef std::vector<PopulationPtr> Populations;
 
 
 class Population

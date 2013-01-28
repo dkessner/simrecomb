@@ -199,7 +199,8 @@ class RandomOrganismIndexGenerator
         if (!fitness_cdf_.get()) 
             return random_.randint(0, population_size_-1);
         else
-            throw runtime_error("TODO: not implemented yet");
+            return random_.randint(0, population_size_-1);
+            //throw runtime_error("TODO: not implemented yet");
     }
 
     private:

@@ -19,6 +19,7 @@
 #include "Population.hpp"
 #include "unit.hpp"
 #include <iostream>
+#include <iterator>
 #include <cstring>
 
 
@@ -190,6 +191,8 @@ void testPopulation_generated()
     if (os_) *os_ << "count01: " << count01 << endl;
     if (os_) *os_ << "count11: " << count11 << endl;
     if (os_) *os_ << endl;
+
+    Organism::recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>();
 }
 
 
@@ -251,6 +254,79 @@ void testPopulationIO_Binary()
 }
 
 
+void testPopulation_fitness_constructor()
+{
+    if (os_) *os_ << "testPopulation_fitness_constructor()\n";
+
+    Population::Config config0;
+    config0.size = 200;
+    config0.chromosomePairCount = 1;
+
+    PopulationPtr p0(new Population(config0));
+    cout << "p.size(): " << p0->organisms().size() << endl;
+
+    Populations populations;
+    populations.push_back(p0);
+
+    /*
+    for (Organisms::const_iterator it=p.organisms().begin(); it!=p.organisms().end(); ++it)
+        cout << it->chromosomePairs()[0].first.blocks()[0] << " " 
+             << it->chromosomePairs()[0].second.blocks()[0] << endl;
+     */
+
+    DataVectorPtr fitness_vector(new DataVector(config0.size));
+    for (size_t i=0; i<config0.size/2; ++i) fitness_vector->at(i) = 1;
+    for (size_t i=config0.size/2; i<config0.size; ++i) fitness_vector->at(i) = 2;
+
+    cout << "fitness vector: " << fitness_vector->size() << endl;
+    copy(fitness_vector->begin(), fitness_vector->end(), ostream_iterator<double>(cout, " "));
+    cout << endl;
+
+    DataVectorPtrs fitnesses;
+    fitnesses.push_back(fitness_vector);
+
+    Random random;
+
+    Population::Config config1;
+    config1.size = config0.size;
+    config1.matingDistribution.push_back(1, make_pair(0,0));
+
+    cout << flush;
+
+    //cout << "recomb gen: " << Organism::recombinationPositionGenerator_ << endl << flush;
+    Organism::recombinationPositionGenerator_ = 
+        shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Trivial(random));
+
+    Population p1(config1, populations, fitnesses, random);
+
+    cout << "p1 size:" << p1.organisms().size() << endl;
+
+    size_t count1 = 0;
+    size_t count2 = 0;
+
+    for (Organisms::const_iterator it=p1.organisms().begin(); it!=p1.organisms().end(); ++it)
+    {
+        cout << it->chromosomePairs()[0].first.blocks()[0] << " " 
+             << it->chromosomePairs()[0].second.blocks()[0] << endl;
+
+        if (Chromosome::ID(it->chromosomePairs()[0].first.blocks()[0].id).individual < config0.size/2) 
+            count1++;
+        else
+            count2++;
+
+        if (Chromosome::ID(it->chromosomePairs()[0].second.blocks()[0].id).individual < config0.size/2) 
+            count1++;
+        else
+            count2++;
+    }
+
+    cout << "count1: " << count1 << endl;
+    cout << "count2: " << count2 << endl;
+
+    Organism::recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>();
+}
+
+
 void test()
 {
     testMatingDistribution();
@@ -259,6 +335,7 @@ void test()
     testPopulationConfigIO();
     testPopulationIO();
     testPopulationIO_Binary();
+    testPopulation_fitness_constructor();
 }
 
 
