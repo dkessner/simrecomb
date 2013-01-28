@@ -179,10 +179,39 @@ Population::Population(const Config& config)
 
 namespace {
 
-inline size_t random_organism_index(const Population& p, const Random& random)
+
+class RandomOrganismIndexGenerator
 {
-    return random.randint(0, p.organisms().size()-1);
-}
+    public:
+
+    RandomOrganismIndexGenerator(const Population& p,
+                                 const DataVectorPtr& fitness_vector,
+                                 const Random& random)
+    :   population_size_(p.organisms().size()),
+        random_(random)
+    {
+        if (fitness_vector.get()) 
+            fitness_cdf_ = fitness_vector->cdf(); // memory allocation for cdf
+    }
+
+    size_t operator()() const
+    {
+        if (!fitness_cdf_.get()) 
+            return random_.randint(0, population_size_-1);
+        else
+            throw runtime_error("TODO: not implemented yet");
+    }
+
+    private:
+
+    size_t population_size_;
+    DataVectorPtr fitness_cdf_;
+    const Random& random_;
+};
+
+
+typedef shared_ptr<RandomOrganismIndexGenerator> RandomOrganismIndexGeneratorPtr;
+
 
 } // namespace
 
@@ -192,7 +221,21 @@ Population::Population(const Config& config,
                        const DataVectorPtrs& fitnesses,
                        const Random& random)
 {
+    if (populations.size() != fitnesses.size())
+        throw runtime_error("[Population::Population()] Fitness vector count != population count.");
+
     organisms_.reserve(config.size);
+
+    // instantiate RandomOrganismIndexGenerators (one for each population)
+
+    vector<RandomOrganismIndexGeneratorPtr> random_organism_index_generators;
+
+    DataVectorPtrs::const_iterator fitness = fitnesses.begin();
+    for (Populations::const_iterator population=populations.begin(); population!=populations.end(); ++population, ++fitness)
+        random_organism_index_generators.push_back(RandomOrganismIndexGeneratorPtr(
+            new RandomOrganismIndexGenerator(**population, *fitness, random)));
+
+    // create Organisms for new population
 
     for (size_t i=0; i<config.size; ++i)
     {
@@ -205,13 +248,10 @@ Population::Population(const Config& config,
             populations[parentIndices.second]->organisms().empty())
             throw runtime_error("[Population::Population()] Empty population.");
 
-        const Population& pop1 = *populations[parentIndices.first];
-        const Population& pop2 = *populations[parentIndices.second];
-
-        size_t index1 = random_organism_index(pop1, random);
+        size_t index1 = (*random_organism_index_generators[parentIndices.first])();
         size_t index2 = 0;
         do { // avoid selfing
-            index2 = random_organism_index(pop2, random);
+            index2 = (*random_organism_index_generators[parentIndices.second])();
         } while (parentIndices.first == parentIndices.second && index1 == index2);
 
         const Organism& mom = populations[parentIndices.first]->organisms()[index1];
