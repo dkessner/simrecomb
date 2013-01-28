@@ -24,19 +24,11 @@
 #include <vector>
 #include <map>
 #include "boost/shared_ptr.hpp"
+#include "DataVector.hpp"
 #include "Population.hpp"
 
 
 using boost::shared_ptr;
-
-
-class DataVector : public std::vector<double>
-{
-    // add convenience functions:  sum, sum_squares, mean, variance, CDF
-};
-
-
-typedef shared_ptr<DataVector> DataVectorPtr;
 
 
 struct Locus
