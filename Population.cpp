@@ -177,6 +177,16 @@ Population::Population(const Config& config)
 }
 
 
+namespace {
+
+inline size_t random_organism_index(const Population& p, const Random& random)
+{
+    return random.randint(0, p.organisms().size()-1);
+}
+
+} // namespace
+
+
 Population::Population(const Config& config,
                        const Populations& populations,
                        const Random& random)
@@ -194,10 +204,13 @@ Population::Population(const Config& config,
             populations[parentIndices.second]->organisms().empty())
             throw runtime_error("[Population::Population()] Empty population.");
 
-        size_t index1 = random.randint(0, populations[parentIndices.first]->organisms().size()-1);
+        const Population& pop1 = *populations[parentIndices.first];
+        const Population& pop2 = *populations[parentIndices.second];
+
+        size_t index1 = random_organism_index(pop1, random);
         size_t index2 = 0;
         do { // avoid selfing
-            index2 = random.randint(0, populations[parentIndices.second]->organisms().size()-1);
+            index2 = random_organism_index(pop2, random);
         } while (parentIndices.first == parentIndices.second && index1 == index2);
 
         const Organism& mom = populations[parentIndices.first]->organisms()[index1];
@@ -285,7 +298,7 @@ ostream& operator<<(ostream& os, const Population::Config& config)
     if (config.idOffset != 0)
         os << " idOffset=" << config.idOffset;
 
-    if (config.chromosomePairCount != 1)
+    if (config.chromosomePairCount != 0)
         os << " chromosomePairCount=" << config.chromosomePairCount;
 
     if (!config.matingDistribution.entries().empty())
