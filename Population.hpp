@@ -68,6 +68,7 @@ std::istream& operator>>(std::istream& is, MatingDistribution& md);
 class Population;
 typedef shared_ptr<Population> PopulationPtr;
 typedef std::vector<PopulationPtr> Populations;
+typedef shared_ptr<Populations> PopulationsPtr;
 
 
 class Population
@@ -106,6 +107,13 @@ class Population
     // binary read/write
     void read(std::istream& is);
     void write(std::ostream& os) const;
+
+    // convenience function
+
+    static PopulationsPtr create_populations(const std::vector<Population::Config>& configs,
+                                             const Populations& previous, 
+                                             const DataVectorPtrs& fitnesses,
+                                             const Random& random);
 
     private:
 
