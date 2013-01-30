@@ -48,6 +48,7 @@ class MatingDistribution
 
     typedef std::vector<Entry> Entries;
     const Entries& entries() const {return entries_;} 
+    bool empty() const {return entries_.empty();} 
 
     private:
     Entries entries_;
@@ -78,28 +79,27 @@ class Population
         size_t size;
 
         // for generating population from nothing
+        size_t chromosomePairCount; 
         unsigned int populationID;
         unsigned int idOffset;
-        size_t chromosomePairCount; 
 
         // for generating population from a previous generation
         MatingDistribution matingDistribution;
 
         Config() 
-        :   size(0), populationID(0), idOffset(0), chromosomePairCount(0)
+        :   size(0), chromosomePairCount(0), populationID(0), idOffset(0)
         {}
     };
 
-    // construct an initial Population
-    Population(const Config& config = Config());
+    Population() {}
 
-    // construct a Population from Populations (e.g. from a previous generation)
-    Population(const Config& config,
-               const Populations& populations,
-               const DataVectorPtrs& fitnesses,
-               const Random& random);
+    void create_organisms(const Config& config,
+                          const Populations& populations = Populations(),
+                          const DataVectorPtrs& fitnesses = DataVectorPtrs(),
+                          const Random& random = Random());
 
     const std::vector<Organism>& organisms() const {return organisms_;}
+    size_t size() const {return organisms_.size();}
 
     boost::shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
 
@@ -112,6 +112,10 @@ class Population
     Organisms organisms_;
 
     friend std::istream& operator>>(std::istream& is, Population& p);
+
+    // disallow copying
+    Population(Population&);
+    Population& operator=(Population&);
 };
 
 

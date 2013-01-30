@@ -167,16 +167,6 @@ istream& operator>>(istream& is, MatingDistribution& md)
 //
 
 
-Population::Population(const Config& config)
-{
-    for (size_t i=0; i<config.size; ++i)
-    {
-        Chromosome::ID id(config.populationID, config.idOffset+i, 0, 0);
-        organisms_.push_back(Organism(id, config.chromosomePairCount));
-    }
-}
-
-
 namespace {
 
 
@@ -232,13 +222,39 @@ typedef shared_ptr<RandomOrganismIndexGenerator> RandomOrganismIndexGeneratorPtr
 } // namespace
 
 
-Population::Population(const Config& config,
-                       const Populations& populations,
-                       const DataVectorPtrs& fitnesses,
-                       const Random& random)
+void Population::create_organisms(const Config& config,
+                                  const Populations& populations,
+                                  const DataVectorPtrs& fitnesses,
+                                  const Random& random)
 {
+    if (config.size == 0)
+        return;
+
+    // sanity check: exactly one of {chromosomePairCount, matingDistribution} must be specified
+
+    if (config.chromosomePairCount==0 && config.matingDistribution.empty())
+        throw runtime_error("[Population::create_organisms()] Must specify nonzero chromosome pair count, or a mating distribution.");
+
+    if (config.chromosomePairCount!=0 && !config.matingDistribution.empty())
+        throw runtime_error("[Population::create_organisms()] Chromosome pair count and mating distribution both specified -- not sure what to do.");
+
+    // create organisms from nothing
+
+    if (config.chromosomePairCount != 0)
+    {
+        for (size_t i=0; i<config.size; ++i)
+        {
+            Chromosome::ID id(config.populationID, config.idOffset+i, 0, 0);
+            organisms_.push_back(Organism(id, config.chromosomePairCount));
+        }
+
+        return;
+    }
+
+    // create organisms from previous generation
+
     if (populations.size() != fitnesses.size())
-        throw runtime_error("[Population::Population()] Fitness vector count != population count.");
+        throw runtime_error("[Population::create_organisms()] Fitness vector count != population count.");
 
     organisms_.reserve(config.size);
 
@@ -277,21 +293,6 @@ Population::Population(const Config& config,
 }
 
 
-/*
-Population::Population(const std::string& filename)
-{
-    ifstream is(filename.c_str());
-    if (!is)
-        throw runtime_error(("[Population] Unable to open file " + filename).c_str());
-        
-    is >> *this;
-
-    if (organisms_.empty())
-        cerr << "[Population] Warning: no population data read from file " << filename << endl;
-}
-*/
-
-
 shared_ptr<Population> Population::randomSubsample(size_t size, Random& random) const
 {
     if (size > organisms_.size())
@@ -301,7 +302,7 @@ shared_ptr<Population> Population::randomSubsample(size_t size, Random& random) 
     while (indices.size() < size) // may take a long time if size is close to organisms_.size()
         indices.insert(random.randint(0,organisms_.size()-1));
 
-    shared_ptr<Population> subsample(new Population(Config()));
+    shared_ptr<Population> subsample(new Population());
 
     for (set<size_t>::const_iterator it=indices.begin(); it!=indices.end(); ++it)
         subsample->organisms_.push_back(organisms_[*it]);

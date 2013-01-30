@@ -135,9 +135,20 @@ shared_ptr<Populations> createPopulations(shared_ptr<Populations> current,
     for (vector<Population::Config>::const_iterator it=populationConfigs.begin(); it!=populationConfigs.end(); ++it)
     {
         if (!current.get())
-            result->push_back(shared_ptr<Population>(new Population(*it)));
+        {
+            PopulationPtr p(new Population);
+            p->create_organisms(*it);
+            result->push_back(p);
+            //result->push_back(shared_ptr<Population>(new Population(*it)));
+
+        }
         else
-            result->push_back(shared_ptr<Population>(new Population(*it, *current, fitnesses, random)));
+        {
+            PopulationPtr p(new Population);
+            p->create_organisms(*it, *current, fitnesses, random);
+            result->push_back(p);
+            //result->push_back(shared_ptr<Population>(new Population(*it, *current, fitnesses, random)));
+        }
     }
 
     return result; 

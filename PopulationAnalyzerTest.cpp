@@ -31,8 +31,8 @@ ostream* os_ = 0;
 
 void test()
 {
-    PopulationAnalyzer analyzer;
-    analyzer.analyze(Population());
+    //PopulationAnalyzer analyzer;
+    //analyzer.analyze(Population());
 }
 
 

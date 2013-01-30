@@ -116,7 +116,9 @@ void testPopulation_initial()
     config0.size = 10;
     config0.populationID = 0;
     config0.chromosomePairCount = 1;
-    Population p0(config0);
+
+    Population p0;
+    p0.create_organisms(config0);
     unit_assert(p0.organisms().size() == 10);
     if (os_) *os_ << "p0:\n" << p0 << endl;
 
@@ -125,7 +127,8 @@ void testPopulation_initial()
     config1.populationID = 1;
     config1.idOffset = 1000; // individuals==1000,1001,..., 
     config1.chromosomePairCount = 3;
-    Population p1(config1);
+    Population p1;
+    p1.create_organisms(config1);
     unit_assert(p1.organisms().size() == 4);
     if (os_) *os_ << "p1:\n" << p1 << endl;
     if (os_) *os_ << endl;
@@ -151,8 +154,10 @@ void testPopulation_generated()
     config1.populationID = 1;
     config1.chromosomePairCount = 1;
 
-    shared_ptr<Population> p0(new Population(config0));
-    shared_ptr<Population> p1(new Population(config1));
+    shared_ptr<Population> p0(new Population());
+    p0->create_organisms(config0);
+    shared_ptr<Population> p1(new Population());
+    p1->create_organisms(config1);
 
     if (os_) *os_ << "p0:\n" << *p0 << endl;
     if (os_) *os_ << "p1:\n" << *p1 << endl;
@@ -160,7 +165,6 @@ void testPopulation_generated()
     Populations populations;
     populations.push_back(p0);
     populations.push_back(p1);
-
     
     Population::Config config_nextgen;
     config_nextgen.size = 100;
@@ -170,7 +174,8 @@ void testPopulation_generated()
 
     DataVectorPtrs dummy_fitnesses(populations.size());
 
-    Population nextgen(config_nextgen, populations, dummy_fitnesses, random);
+    Population nextgen;
+    nextgen.create_organisms(config_nextgen, populations, dummy_fitnesses, random);
     if (os_) *os_ << "nextgen:\n" << nextgen << endl;
 
     int count00 = 0;
@@ -206,7 +211,8 @@ void testPopulationIO()
     config.size = 10;
     config.populationID = 0;
     config.chromosomePairCount = 1;
-    Population p(config);
+    Population p;
+    p.create_organisms(config);
     unit_assert(p.organisms().size() == 10);
     if (os_) *os_ << "p:\n" << p << endl;
 
@@ -235,7 +241,8 @@ void testPopulationIO_Binary()
     config.size = 10;
     config.populationID = 0;
     config.chromosomePairCount = 1;
-    Population p(config);
+    Population p;
+    p.create_organisms(config);
     unit_assert(p.organisms().size() == 10);
     if (os_) *os_ << "p:\n" << p << endl;
 
@@ -266,7 +273,8 @@ void testPopulation_fitness_constructor()
     config0.size = 2 * N;
     config0.chromosomePairCount = 1;
 
-    PopulationPtr p0(new Population(config0));
+    PopulationPtr p0(new Population());
+    p0->create_organisms(config0);
 
     Populations populations;
     populations.push_back(p0);
@@ -289,7 +297,8 @@ void testPopulation_fitness_constructor()
     Organism::recombinationPositionGenerator_ = 
         shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Trivial(random));
 
-    Population p1(config1, populations, fitnesses, random);
+    Population p1;
+    p1.create_organisms(config1, populations, fitnesses, random);
     unit_assert(p1.organisms().size() == 2*N);
 
     size_t count1 = 0;
