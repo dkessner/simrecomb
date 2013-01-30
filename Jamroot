@@ -48,6 +48,7 @@ lib libsimrecomb :
     PopulationAnalyzer.cpp
     RecombinationMap.cpp 
     Random.cpp 
+    Simulator.cpp
     ;
 
 
@@ -59,6 +60,7 @@ unit-test PopulationTest : PopulationTest.cpp libsimrecomb ;
 unit-test PopulationAnalyzerTest : PopulationAnalyzerTest.cpp libsimrecomb ;
 unit-test RandomTest : RandomTest.cpp libsimrecomb ;
 unit-test RecombinationMapTest : RecombinationMapTest.cpp libsimrecomb ;
+unit-test SimulatorTest : SimulatorTest.cpp libsimrecomb ;
 
 
 run MSFormatTest.cpp libsimrecomb

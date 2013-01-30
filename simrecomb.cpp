@@ -17,7 +17,7 @@
 //
 
 
-#include "Population.hpp"
+#include "Simulator.hpp"
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -32,210 +32,52 @@ using boost::shared_ptr;
 namespace bfs = boost::filesystem;
 
 
-struct SimulationConfig
-{
-    unsigned int seed;
-    vector<string> geneticMapFilenames;
-    vector< vector<Population::Config> > populationConfigs; // each generation is a vector<Population::Config>
-
-    SimulationConfig() : seed(0) {}
-};
-
-
-ostream& operator<<(ostream& os, const SimulationConfig& simulationConfig)
-{
-    os << "seed " << simulationConfig.seed << endl << endl;
-
-    os << "geneticMapFilenames " << simulationConfig.geneticMapFilenames.size() << endl; 
-    for (vector<string>::const_iterator it=simulationConfig.geneticMapFilenames.begin();
-         it!=simulationConfig.geneticMapFilenames.end(); ++it)
-        os << "geneticMapFilename " << *it << endl;
-    os << endl;
-
-    for (size_t i=0; i<simulationConfig.populationConfigs.size(); i++)
-    {
-        os << "generation " << i << endl;
-        copy(simulationConfig.populationConfigs[i].begin(), simulationConfig.populationConfigs[i].end(), 
-             ostream_iterator<Population::Config>(os,"\n"));
-        os << endl;
-    }
-
-    return os;
-}
-
-
-istream& operator>>(istream& is, SimulationConfig& simulationConfig)
-{
-    while (is)
-    {
-        // parse line by line
-
-        string buffer;
-        getline(is, buffer);
-        if (!is) return is;
-
-        vector<string> tokens;
-        istringstream iss(buffer);
-        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter(tokens));
-
-        // switch on first token
-
-        if (tokens.empty())
-            continue;
-        else if (tokens[0] == "seed" && tokens.size() == 2)
-            simulationConfig.seed = atoi(tokens[1].c_str());
-        else if (tokens[0] == "geneticMapFilenames")
-            continue;
-        else if (tokens[0] == "geneticMapFilename" && tokens.size()==2)
-            simulationConfig.geneticMapFilenames.push_back(tokens[1]);
-        else if (tokens[0] == "generation")
-            simulationConfig.populationConfigs.push_back(vector<Population::Config>());
-        else if (tokens[0] == "population")
-        {
-            simulationConfig.populationConfigs.back().push_back(Population::Config());
-            istringstream temp(buffer);
-            temp >> simulationConfig.populationConfigs.back().back();
-        }
-        else
-            cerr << "Ignoring invalid configuration line:\n" << buffer << endl;
-    }
-
-    return is;
-}
-
-
-void printPopulations(ostream& os, const Populations& populations, const string& label)
-{
-    os << "<" << label << ">\n";
-    for (size_t i=0; i<populations.size(); i++)
-    {
-        os << "<population" << i << ">\n" 
-             << *populations[i]
-             << "</population" << i << ">\n";
-    }
-    os << "</" << label << ">\n";
-}
-
-
-void initializeExampleSimulationConfig(SimulationConfig& simulationConfig)
+void initializeExampleSimulatorConfig(Simulator::Config& config)
 {
     const size_t chromosomePairCount_ = 3;
     const unsigned int populationSize_ = 10000;
     const double admixtureProportion_ = .8; // fraction of genes from 1st population
 
     for (size_t i=0; i<chromosomePairCount_; i++) 
-        simulationConfig.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
+        config.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
 
     // generation 0 (ancestral populations)
 
-    simulationConfig.populationConfigs.push_back(vector<Population::Config>(3));
+    config.populationConfigs.push_back(vector<Population::Config>(3));
 
-    Population::Config* config = &simulationConfig.populationConfigs[0][0];
-    config->size = 0;
-    config->populationID = 0;
+    Population::Config* config_pop = &config.populationConfigs[0][0];
+    config_pop->size = 0;
+    config_pop->populationID = 0;
 
-    config = &simulationConfig.populationConfigs[0][1];
-    config->size = populationSize_;
-    config->populationID = 1;
-    config->chromosomePairCount = chromosomePairCount_;
+    config_pop = &config.populationConfigs[0][1];
+    config_pop->size = populationSize_;
+    config_pop->populationID = 1;
+    config_pop->chromosomePairCount = chromosomePairCount_;
 
-    config = &simulationConfig.populationConfigs[0][2];
-    config->size = populationSize_;
-    config->populationID = 2;
-    config->chromosomePairCount = chromosomePairCount_;
+    config_pop = &config.populationConfigs[0][2];
+    config_pop->size = populationSize_;
+    config_pop->populationID = 2;
+    config_pop->chromosomePairCount = chromosomePairCount_;
 
     // generation 1 (initial admixture)
 
-    simulationConfig.populationConfigs.push_back(vector<Population::Config>(1));
+    config.populationConfigs.push_back(vector<Population::Config>(1));
 
-    config = &simulationConfig.populationConfigs[1][0];
-    config->size = populationSize_;
+    config_pop = &config.populationConfigs[1][0];
+    config_pop->size = populationSize_;
     double p = admixtureProportion_;
-    config->matingDistribution.push_back(p*p, make_pair(1,1));
-    config->matingDistribution.push_back(2*p*(1-p), make_pair(1,2));
-    config->matingDistribution.push_back((1-p)*(1-p), make_pair(2,2));
+    config_pop->matingDistribution.push_back(p*p, make_pair(1,1));
+    config_pop->matingDistribution.push_back(2*p*(1-p), make_pair(1,2));
+    config_pop->matingDistribution.push_back((1-p)*(1-p), make_pair(2,2));
 
     // subsequent generations - just recombination
 
     for (size_t generation=2; generation<8; generation++)
     {
-        simulationConfig.populationConfigs.push_back(vector<Population::Config>(1));
-        config = &simulationConfig.populationConfigs[generation][0];
-        config->size = populationSize_;
-        config->matingDistribution.push_back(1, make_pair(0,0));
-    }
-}
-
-
-void initializeRecombinationMaps(const SimulationConfig& simulationConfig, const Random& random)
-{
-    Organism::recombinationPositionGenerator_ =
-        shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_RecombinationMap(simulationConfig.geneticMapFilenames, random));
-}
-
-
-shared_ptr<Populations> createPopulations(shared_ptr<Populations> current, 
-                                          const vector<Population::Config>& populationConfigs,
-                                          const DataVectorPtrs& fitnesses,
-                                          const Random& random)
-{
-    shared_ptr<Populations> result(new Populations);
-
-    for (vector<Population::Config>::const_iterator it=populationConfigs.begin(); it!=populationConfigs.end(); ++it)
-    {
-        if (!current.get())
-            result->push_back(shared_ptr<Population>(new Population(*it)));
-        else
-            result->push_back(shared_ptr<Population>(new Population(*it, *current, fitnesses, random)));
-    }
-
-    return result; 
-}
-
-
-void simulate(const SimulationConfig& simulationConfig, bfs::path outputDirectory)
-{
-    bfs::ofstream osSimulationConfig(outputDirectory / "simrecomb_config.txt");
-    osSimulationConfig << simulationConfig;
-    osSimulationConfig.close();
-
-    Random random(simulationConfig.seed);
-
-    cout << "Initializing recombination maps.\n";
-    initializeRecombinationMaps(simulationConfig, random);
-
-    bfs::ofstream osLog(outputDirectory / "log.txt");
-
-    shared_ptr<Populations> current;
-    const size_t generation_count = simulationConfig.populationConfigs.size();
-    for (size_t generation=0; generation<generation_count; generation++)
-    {
-        cout << "Generation " << generation << endl;
-
-        DataVectorPtrs dummy_fitnesses(current.get() ? current->size() : 0);
-
-        shared_ptr<Populations> next = 
-            createPopulations(current, simulationConfig.populationConfigs[generation], dummy_fitnesses, random);
-
-        current = next;
-
-        ostringstream label;
-        label << "gen" << generation;
-        //printPopulations(osLog, *current, label.str());
-        osLog << generation << endl;
-    }
-
-    osLog.close();
-
-    // output the last generation
-    
-    for (size_t i=0; i<current->size(); ++i)
-    {
-        ostringstream filename;
-        filename << "pop" << i << ".txt"; 
-        bfs::ofstream os_pop(outputDirectory / filename.str());
-        os_pop << *(*current)[i];
+        config.populationConfigs.push_back(vector<Population::Config>(1));
+        config_pop = &config.populationConfigs[generation][0];
+        config_pop->size = populationSize_;
+        config_pop->matingDistribution.push_back(1, make_pair(0,0));
     }
 }
 
@@ -273,18 +115,19 @@ int main(int argc, char* argv[])
 
             cout << "Reading configuration file " << configFilename << endl;
             bfs::ifstream is(configFilename);
-            SimulationConfig simulationConfig;
-            is >> simulationConfig;
+            Simulator::Config config;
+            is >> config;
             is.close();
 
             bfs::create_directories(outputDirectory);
 
-            simulate(simulationConfig, outputDirectory);
+            Simulator simulator;
+            simulator.simulate(config, outputDirectory);
         }
         else if (subfunction == "example")
         {
-            SimulationConfig temp;
-            initializeExampleSimulationConfig(temp);
+            Simulator::Config temp;
+            initializeExampleSimulatorConfig(temp);
             cout << temp;
         }
         else if (subfunction == "txt2pop")
