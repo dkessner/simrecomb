@@ -24,6 +24,38 @@
 #include "Organism.hpp"
 
 
+struct Locus
+{
+    size_t chromosome_pair_index;
+    unsigned int position;
+
+    Locus(size_t _chromosome_pair_index = 0, unsigned int _position = 0) 
+    :   chromosome_pair_index(_chromosome_pair_index), position(_position) 
+    {}
+};
+
+
+inline bool operator<(const Locus& a, const Locus& b)
+{
+    return (a.chromosome_pair_index < b.chromosome_pair_index) ||
+           (a.chromosome_pair_index == b.chromosome_pair_index && a.position < b.position);
+}
+
+
+/*
+struct PopulationData
+{
+    std::map<Locus, DataVectorPtr> genotypes;
+    std::vector<DataVectorPtr> trait_values;
+    DataVectorPtr fitness;
+};
+*/
+
+
+//////////////
+
+
+
 class SNPIndicator
 {
     public:

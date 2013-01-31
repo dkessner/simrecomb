@@ -45,7 +45,6 @@ lib libsimrecomb :
     MSFormat.cpp
     Organism.cpp 
     Population.cpp
-    PopulationAnalyzer.cpp
     RecombinationMap.cpp 
     Random.cpp 
     Simulator.cpp
@@ -57,7 +56,6 @@ unit-test GenotyperTest : GenotyperTest.cpp libsimrecomb ;
 unit-test DataVectorTest : DataVectorTest.cpp libsimrecomb ;
 unit-test OrganismTest : OrganismTest.cpp libsimrecomb ;
 unit-test PopulationTest : PopulationTest.cpp libsimrecomb ;
-unit-test PopulationAnalyzerTest : PopulationAnalyzerTest.cpp libsimrecomb ;
 unit-test RandomTest : RandomTest.cpp libsimrecomb ;
 unit-test RecombinationMapTest : RecombinationMapTest.cpp libsimrecomb ;
 unit-test SimulatorTest : SimulatorTest.cpp libsimrecomb boost_filesystem boost_system ;
