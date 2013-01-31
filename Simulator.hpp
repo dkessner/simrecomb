@@ -22,6 +22,7 @@
 
 
 #include "Population.hpp"
+#include "boost/filesystem.hpp"
 #include <vector>
 #include <string>
 
@@ -33,17 +34,21 @@ class Simulator
     struct Config
     {
         unsigned int seed;
-        std::vector<std::string> geneticMapFilenames; // one filename for each chromosome pair
-        std::vector< std::vector<Population::Config> > populationConfigs; // each generation is a vector<Population::Config>
+        std::vector<std::string> geneticMapFilenames;     // one filename for each chromosome pair
+        std::vector<Population::Configs> populationConfigs; // Population::Configs for each generation
 
         Config() : seed(0) {}
     };
 
-    Simulator();
+    Simulator(const Config& config, const std::string& output_directory);
 
-    void simulate(const Config& config, const std::string& outputDirectory);
+    void simulate();
 
     private:
+
+    Config config_;
+    boost::filesystem::path output_directory_;
+    Random random_;
 };
 
 

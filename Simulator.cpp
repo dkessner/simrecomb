@@ -101,8 +101,24 @@ istream& operator>>(istream& is, Simulator::Config& config)
 //
 
 
-Simulator::Simulator()
-{}
+Simulator::Simulator(const Config& config, const string& output_directory)
+:   config_(config), output_directory_(output_directory), random_(config.seed)
+{
+    cout << "[Simulator] Initializing.\n";
+
+    // write config file used
+
+    bfs::ofstream os_config(output_directory_ / "simrecomb_config.txt");
+    os_config  << config;
+    os_config.close();
+
+    // initialize recombination maps
+
+    cout << "[Simulator] Initializing recombination maps.\n";
+    Organism::recombinationPositionGenerator_ =
+        shared_ptr<RecombinationPositionGenerator>(
+            new RecombinationPositionGenerator_RecombinationMap(config.geneticMapFilenames, random_));
+}
 
 
 void printPopulations(ostream& os, const Populations& populations, const string& label)
@@ -117,32 +133,14 @@ void printPopulations(ostream& os, const Populations& populations, const string&
     os << "</" << label << ">\n";
 }
 
-void initializeRecombinationMaps(const Simulator::Config& simulationConfig, const Random& random)
+
+void Simulator::simulate()
 {
-    Organism::recombinationPositionGenerator_ =
-        shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_RecombinationMap(simulationConfig.geneticMapFilenames, random));
-}
-
-
-void Simulator::simulate(const Simulator::Config& simulationConfig, const string& outputDirectoryName)
-{
-    bfs::path outputDirectory(outputDirectoryName);
-
-    bfs::ofstream os_config(outputDirectory / "simrecomb_config.txt");
-    os_config  << simulationConfig;
-    os_config.close();
-
-    Random random(simulationConfig.seed);
-
-    cout << "Initializing recombination maps.\n";
-    initializeRecombinationMaps(simulationConfig, random);
-
-    bfs::ofstream osLog(outputDirectory / "log.txt");
+    bfs::ofstream osLog(output_directory_ / "log.txt");
 
     PopulationsPtr current(new Populations);
 
-    const size_t generation_count = simulationConfig.populationConfigs.size();
+    const size_t generation_count = config_.populationConfigs.size();
     for (size_t generation=0; generation<generation_count; generation++)
     {
         cout << "Generation " << generation << endl;
@@ -150,7 +148,7 @@ void Simulator::simulate(const Simulator::Config& simulationConfig, const string
         DataVectorPtrs dummy_fitnesses(current.get() ? current->size() : 0);
 
         PopulationsPtr next = Population::create_populations(
-            simulationConfig.populationConfigs[generation], *current, dummy_fitnesses, random);
+            config_.populationConfigs[generation], *current, dummy_fitnesses, random_);
 
         current = next;
 
@@ -168,7 +166,7 @@ void Simulator::simulate(const Simulator::Config& simulationConfig, const string
     {
         ostringstream filename;
         filename << "pop" << i << ".txt"; 
-        bfs::ofstream os_pop(outputDirectory / filename.str());
+        bfs::ofstream os_pop(output_directory_ / filename.str());
         os_pop << *(*current)[i];
     }
 }

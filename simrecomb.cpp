@@ -121,8 +121,8 @@ int main(int argc, char* argv[])
 
             bfs::create_directories(outputDirectory);
 
-            Simulator simulator;
-            simulator.simulate(config, outputDirectory);
+            Simulator simulator(config, outputDirectory);
+            simulator.simulate();
         }
         else if (subfunction == "example")
         {

@@ -94,6 +94,8 @@ class Population
         {}
     };
 
+    typedef std::vector<Config> Configs;
+
     void create_organisms(const Config& config,
                           const Populations& populations = Populations(),
                           const DataVectorPtrs& fitnesses = DataVectorPtrs(),
