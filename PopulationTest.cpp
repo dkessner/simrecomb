@@ -341,6 +341,69 @@ void testPopulation_fitness_constructor()
 }
 
 
+void testPopulation_fitness_constructor_2()
+{
+    if (os_) *os_ << "testPopulation_fitness_constructor_2()\n";
+
+    // create a new population
+
+    const size_t N = 10;
+
+    Population::Config config0;
+    config0.size = N;
+    config0.chromosomePairCount = 1;
+
+    PopulationPtr p0(new Population());
+    p0->create_organisms(config0);
+
+    if (os_) *os_ << "p0:\n" << *p0 << endl;
+
+    Populations populations;
+    populations.push_back(p0);
+
+    const unsigned int seed = 123;
+    Random random(seed);
+
+    // create new generation with fitness vector (1,...,1)
+
+    DataVectorPtr fitness_vector(new DataVector(config0.size));
+    for (size_t i=0; i<N; ++i) fitness_vector->at(i) = 1;
+
+    DataVectorPtrs fitnesses;
+    fitnesses.push_back(fitness_vector);
+
+
+    Population::Config config1;
+    config1.size = config0.size;
+    config1.matingDistribution.push_back(1, make_pair(0,0)); // random mating
+
+    Organism::recombinationPositionGenerator_ = 
+        shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Trivial(random));
+
+    Population p1;
+    p1.create_organisms(config1, populations, fitnesses, random);
+    unit_assert(p1.organisms().size() == N);
+
+    if (os_) *os_ << "p1:\n" << p1 << endl;
+
+    // create new generation, with no fitness vector specified (uniform random index)
+
+    random.seed(seed); // reset seed
+
+    Population p1b;
+    p1b.create_organisms(config1, populations, DataVectorPtrs(1), random);
+    unit_assert(p1b.organisms().size() == N);
+
+    unit_assert(p1 == p1b); // main test: these populations should be identical
+
+    if (os_) *os_ << "p1b:\n" << p1b << endl;
+
+    // reset
+
+    Organism::recombinationPositionGenerator_ = shared_ptr<RecombinationPositionGenerator>();
+}
+
+
 void test()
 {
     testMatingDistribution();
@@ -350,6 +413,7 @@ void test()
     testPopulationIO();
     testPopulationIO_Binary();
     testPopulation_fitness_constructor();
+    testPopulation_fitness_constructor_2();
 }
 
 
