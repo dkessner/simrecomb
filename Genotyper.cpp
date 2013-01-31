@@ -20,15 +20,38 @@
 #include "Genotyper.hpp"
 
 
-unsigned int Genotyper::genotype(const Organism& organism, size_t chromosome_pair_index,
-                                 unsigned int position, const SNPIndicator& indicator) const
+unsigned int Genotyper::genotype(const Locus& locus, 
+                                 const Organism& organism,
+                                 const SNPIndicator& indicator) const
 {
-    const ChromosomePair& cp = organism.chromosomePairs()[chromosome_pair_index];
-    const DNABlock& block0 = cp.first.find_block(position);
-    const DNABlock& block1 = cp.second.find_block(position);
-    return indicator(position, block0.id) + indicator(position, block1.id);
+    const ChromosomePair& cp = organism.chromosomePairs()[locus.chromosome_pair_index];
+    const DNABlock& block0 = cp.first.find_block(locus.position);
+    const DNABlock& block1 = cp.second.find_block(locus.position);
+    return indicator(locus.position, block0.id) + indicator(locus.position, block1.id);
 
-    // TODO: add support for parallel iteration with a block index
+    // TODO: add support for parallel iteration with a block index hint
+}
+
+
+GenotypeMapPtr Genotyper::genotype(const Loci& loci, 
+                                   const Population& population,
+                                   const SNPIndicator& indicator) const
+{
+    GenotypeMapPtr genotype_map(new GenotypeMap);
+
+    for (Loci::const_iterator locus=loci.begin(); locus!=loci.end(); ++locus)
+    {
+        GenotypeDataPtr genotypes(new GenotypeData);
+        genotypes->reserve(population.size());
+        const Organisms& organisms = population.organisms();
+
+        for (Organisms::const_iterator organism=organisms.begin(); organism!=organisms.end(); ++organism)
+            genotypes->push_back(genotype(*locus, *organism, indicator));
+
+        (*genotype_map)[*locus] = genotypes;
+    }
+
+    return genotype_map;
 }
 
 

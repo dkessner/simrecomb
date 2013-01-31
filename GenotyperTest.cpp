@@ -20,6 +20,7 @@
 #include "Genotyper.hpp"
 #include "unit.hpp"
 #include <iostream>
+#include <iterator>
 
 
 using namespace std;
@@ -45,6 +46,8 @@ void test_genotype_easy()
 {
     const size_t chromosome_pair_index = 0;
     const unsigned int position = 1000000;
+    Locus locus(chromosome_pair_index, position);
+
     SNPIndicator_Test indicator;
     Chromosome::ID id0(0, 0, 0, 0);
     Chromosome::ID id1(1, 0, 0, 0);
@@ -53,8 +56,8 @@ void test_genotype_easy()
     Organism mom(id0);
     Organism dad(id1);
 
-    unsigned int genotype_mom = genotyper.genotype(mom, chromosome_pair_index, position, indicator);
-    unsigned int genotype_dad = genotyper.genotype(dad, chromosome_pair_index, position, indicator);
+    unsigned int genotype_mom = genotyper.genotype(locus, mom, indicator);
+    unsigned int genotype_dad = genotyper.genotype(locus, dad, indicator);
 
     if (os_)
     {
@@ -73,6 +76,8 @@ void test_genotype_harder()
 {
     const size_t chromosome_pair_index = 0;
     const unsigned int position = 1000000;
+    Locus locus(chromosome_pair_index, position);
+
     SNPIndicator_Test indicator;
     Chromosome::ID id0(0, 0, 0, 0);
     Chromosome::ID id1(1, 0, 0, 0);
@@ -89,7 +94,7 @@ void test_genotype_harder()
     blocks2.push_back(DNABlock(0, id1));
     blocks2.push_back(DNABlock(500000, id0));
     blocks2.push_back(DNABlock(900000, id1)); // SNP 1 in this block
-    blocks2.push_back(DNABlock(1000001, id0)); // SNP 1 in this block
+    blocks2.push_back(DNABlock(1000001, id0));
     blocks2.push_back(DNABlock(2000000, id1));
 
     Chromosome chr1(blocks1);
@@ -105,9 +110,9 @@ void test_genotype_harder()
     Organism homo2(gamete2, gamete2);
     Organism hetero(gamete1, gamete2);
 
-    unsigned int genotype_homo1 = genotyper.genotype(homo1, chromosome_pair_index, position, indicator);
-    unsigned int genotype_homo2 = genotyper.genotype(homo2, chromosome_pair_index, position, indicator);
-    unsigned int genotype_hetero = genotyper.genotype(hetero, chromosome_pair_index, position, indicator);
+    unsigned int genotype_homo1 = genotyper.genotype(locus, homo1, indicator);
+    unsigned int genotype_homo2 = genotyper.genotype(locus, homo2, indicator);
+    unsigned int genotype_hetero = genotyper.genotype(locus, hetero, indicator);
 
     if (os_)
     {
@@ -122,6 +127,35 @@ void test_genotype_harder()
     unit_assert(genotype_homo1 == 0);
     unit_assert(genotype_homo2 == 2);
     unit_assert(genotype_hetero == 1);
+
+    Organisms organisms;
+    organisms.push_back(homo1);
+    organisms.push_back(homo2);
+    organisms.push_back(hetero);
+    organisms.push_back(homo1);
+    organisms.push_back(homo2);
+    organisms.push_back(hetero);
+
+    Loci loci;
+    loci.push_back(locus);
+    
+    Population population(organisms);
+
+    GenotypeMapPtr genotype_map = genotyper.genotype(loci, population, indicator);
+
+    GenotypeDataPtr genotypes = genotype_map->at(locus);
+    
+    if (os_)
+    {
+        *os_ << "genotypes: " << genotypes->size() << endl;
+        copy(genotypes->begin(), genotypes->end(), ostream_iterator<double>(*os_, " "));
+        *os_ << endl;
+    }
+
+    unit_assert(genotypes->size() == 6);
+    unit_assert(genotypes->at(0) == 0 && genotypes->at(3) == 0);
+    unit_assert(genotypes->at(1) == 2 && genotypes->at(4) == 2);
+    unit_assert(genotypes->at(2) == 1 && genotypes->at(5) == 1);
 }
 
 

@@ -21,7 +21,13 @@
 #define _GENOTYPER_HPP_
 
 
-#include "Organism.hpp"
+#include "Population.hpp"
+#include "boost/shared_ptr.hpp"
+#include <vector>
+#include <map>
+
+
+using boost::shared_ptr;
 
 
 struct Locus
@@ -35,11 +41,29 @@ struct Locus
 };
 
 
+typedef std::vector<Locus> Loci;
+
+
 inline bool operator<(const Locus& a, const Locus& b)
 {
     return (a.chromosome_pair_index < b.chromosome_pair_index) ||
            (a.chromosome_pair_index == b.chromosome_pair_index && a.position < b.position);
 }
+
+
+class GenotypeData : public std::vector<char>
+{
+    public:
+
+    double allele_frequency() const;
+};
+
+typedef shared_ptr<GenotypeData> GenotypeDataPtr;
+
+
+typedef std::map<Locus, GenotypeDataPtr> GenotypeMap;
+typedef shared_ptr<GenotypeMap> GenotypeMapPtr;
+typedef std::vector<GenotypeMapPtr> GenotypeMapPtrs;
 
 
 /*
@@ -50,10 +74,6 @@ struct PopulationData
     DataVectorPtr fitness;
 };
 */
-
-
-//////////////
-
 
 
 class SNPIndicator
@@ -70,13 +90,15 @@ class Genotyper
 {
     public:
 
-    // returns genotype value in {0, 1, 2}
-    unsigned int genotype(const Organism& organism, size_t chromosome_pair_index,
-                          unsigned int position, const SNPIndicator& indicator) const;
+    // returns genotype value in {0, 1, 2}, for a single organism at a single locus
+    unsigned int genotype(const Locus& locus, 
+                          const Organism& organism,
+                          const SNPIndicator& indicator) const;
 
-    // returns (population x position) genotype matrix, filled in via iteration of genotype(organism, position)
-    // multi_array genotype(const Population& population, vector<unsigned int> position, 
-    //                      const SNPIndicator& indicator) const;
+    // genotypes population at multiple loci
+    GenotypeMapPtr genotype(const Loci& loci, 
+                            const Population& population,
+                            const SNPIndicator& indicator) const;
 };
 
 

@@ -77,6 +77,10 @@ class Population
 
     Population() {}
 
+    Population(const Organisms& organisms)
+    :   organisms_(organisms)
+    {}
+
     struct Config
     {
         size_t size;
