@@ -331,6 +331,24 @@ void Population::write(ostream& os) const
 }
 
 
+PopulationsPtr Population::create_populations(const vector<Population::Config>& configs,
+                                              const Populations& previous, 
+                                              const DataVectorPtrs& fitnesses,
+                                              const Random& random)
+{
+    PopulationsPtr result(new Populations);
+
+    for (vector<Population::Config>::const_iterator it=configs.begin(); it!=configs.end(); ++it)
+    {
+        PopulationPtr p(new Population);
+        p->create_organisms(*it, previous, fitnesses, random);
+        result->push_back(p);
+    }        
+
+    return result;
+}
+
+
 bool operator==(const Population::Config& a, const Population::Config& b)
 {
     return a.size == b.size &&
@@ -450,25 +468,4 @@ istream& operator>>(istream& is, Population& p)
     return is;
 }
 
-
-//
-// Populations
-//
-
-PopulationsPtr Population::create_populations(const vector<Population::Config>& configs,
-                                              const Populations& previous, 
-                                              const DataVectorPtrs& fitnesses,
-                                              const Random& random)
-{
-    PopulationsPtr result(new Populations);
-
-    for (vector<Population::Config>::const_iterator it=configs.begin(); it!=configs.end(); ++it)
-    {
-        PopulationPtr p(new Population);
-        p->create_organisms(*it, previous, fitnesses, random);
-        result->push_back(p);
-    }        
-
-    return result;
-}
 

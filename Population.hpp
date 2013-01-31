@@ -75,6 +75,8 @@ class Population
 {
     public:
 
+    Population() {}
+
     struct Config
     {
         size_t size;
@@ -92,8 +94,6 @@ class Population
         {}
     };
 
-    Population() {}
-
     void create_organisms(const Config& config,
                           const Populations& populations = Populations(),
                           const DataVectorPtrs& fitnesses = DataVectorPtrs(),
@@ -105,10 +105,11 @@ class Population
     boost::shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
 
     // binary read/write
+
     void read(std::istream& is);
     void write(std::ostream& os) const;
 
-    // convenience function
+    // convenience function: creates new generation from previous
 
     static PopulationsPtr create_populations(const std::vector<Population::Config>& configs,
                                              const Populations& previous, 

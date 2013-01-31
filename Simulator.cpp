@@ -124,36 +124,6 @@ void initializeRecombinationMaps(const Simulator::Config& simulationConfig, cons
             new RecombinationPositionGenerator_RecombinationMap(simulationConfig.geneticMapFilenames, random));
 }
 
-/*
-shared_ptr<Populations> createPopulations(shared_ptr<Populations> current, 
-                                          const vector<Population::Config>& populationConfigs,
-                                          const DataVectorPtrs& fitnesses,
-                                          const Random& random)
-{
-    shared_ptr<Populations> result(new Populations);
-
-    for (vector<Population::Config>::const_iterator it=populationConfigs.begin(); it!=populationConfigs.end(); ++it)
-    {
-        if (!current.get())
-        {
-            PopulationPtr p(new Population);
-            p->create_organisms(*it);
-            result->push_back(p);
-            //result->push_back(shared_ptr<Population>(new Population(*it)));
-
-        }
-        else
-        {
-            PopulationPtr p(new Population);
-            p->create_organisms(*it, *current, fitnesses, random);
-            result->push_back(p);
-            //result->push_back(shared_ptr<Population>(new Population(*it, *current, fitnesses, random)));
-        }
-    }
-
-    return result; 
-}
-*/
 
 void Simulator::simulate(const Simulator::Config& simulationConfig, const string& outputDirectoryName)
 {
