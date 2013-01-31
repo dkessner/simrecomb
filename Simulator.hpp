@@ -23,8 +23,10 @@
 
 #include "Population.hpp"
 #include "boost/filesystem.hpp"
+#include "boost/filesystem/fstream.hpp"
 #include <vector>
 #include <string>
+#include <iostream>
 
 
 class Simulator
@@ -40,15 +42,23 @@ class Simulator
         Config() : seed(0) {}
     };
 
-    Simulator(const Config& config, const std::string& output_directory);
+    Simulator(const Config& config, 
+              const std::string& output_directory,      // all output placed here
+              std::ostream* os_progress = &std::cout);  // progress update stream (default: stdout)
 
-    void simulate();
+    void simulate_single_generation(std::ostream* os_log = 0);
+    void simulate_all();
 
     private:
 
     Config config_;
-    boost::filesystem::path output_directory_;
     Random random_;
+
+    boost::filesystem::path output_directory_;
+    std::ostream* os_progress_;
+
+    size_t current_generation_;
+    PopulationsPtr current_populations_;
 };
 
 

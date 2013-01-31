@@ -101,8 +101,12 @@ istream& operator>>(istream& is, Simulator::Config& config)
 //
 
 
-Simulator::Simulator(const Config& config, const string& output_directory)
-:   config_(config), output_directory_(output_directory), random_(config.seed)
+Simulator::Simulator(const Config& config, 
+                     const string& output_directory, 
+                     ostream* os_progress)
+:   config_(config), random_(config.seed),
+    output_directory_(output_directory), os_progress_(os_progress),
+    current_generation_(0), current_populations_(new Populations)
 {
     cout << "[Simulator] Initializing.\n";
 
@@ -134,42 +138,49 @@ void printPopulations(ostream& os, const Populations& populations, const string&
 }
 
 
-void Simulator::simulate()
+void Simulator::simulate_single_generation(ostream* os_log)
 {
-    bfs::ofstream osLog(output_directory_ / "log.txt");
+    if (!current_populations_.get())
+        throw runtime_error("[Simulator::simulate_single_generation()] Null pointer.");
 
-    PopulationsPtr current(new Populations);
+    if (current_generation_ >= config_.populationConfigs.size())
+        throw runtime_error("[Simulator::simulate_single_generation()] Population config not specified.");
+
+    if (os_progress_) *os_progress_ << "[Simulator] Generation " << current_generation_ << endl;
+
+    DataVectorPtrs dummy_fitnesses(current_populations_->size()); 
+
+    PopulationsPtr next = Population::create_populations(
+        config_.populationConfigs[current_generation_], *current_populations_, dummy_fitnesses, random_);
+
+    if (os_log) *os_log << current_generation_ << endl;
+
+    current_populations_ = next;
+    ++current_generation_;
+}
+
+
+void Simulator::simulate_all()
+{
+    bfs::ofstream os_log(output_directory_ / "log.txt");
 
     const size_t generation_count = config_.populationConfigs.size();
     for (size_t generation=0; generation<generation_count; generation++)
     {
-        cout << "Generation " << generation << endl;
-
-        DataVectorPtrs dummy_fitnesses(current.get() ? current->size() : 0);
-
-        PopulationsPtr next = Population::create_populations(
-            config_.populationConfigs[generation], *current, dummy_fitnesses, random_);
-
-        current = next;
-
-        ostringstream label;
-        label << "gen" << generation;
-        //printPopulations(osLog, *current, label.str());
-        osLog << generation << endl;
+        simulate_single_generation(&os_log);
     }
 
-    osLog.close();
+    os_log.close();
 
     // output the last generation
     
-    for (size_t i=0; i<current->size(); ++i)
+    for (size_t i=0; i<current_populations_->size(); ++i)
     {
         ostringstream filename;
         filename << "pop" << i << ".txt"; 
         bfs::ofstream os_pop(output_directory_ / filename.str());
-        os_pop << *(*current)[i];
+        os_pop << *(*current_populations_)[i];
     }
 }
-
 
 
