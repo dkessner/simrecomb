@@ -49,6 +49,8 @@ lib libsimrecomb :
     Random.cpp 
     Simulator.cpp
     SimulationController_NeutralAdmixture.cpp
+    boost_filesystem
+    boost_system
     ;
 
 
@@ -59,8 +61,8 @@ unit-test OrganismTest : OrganismTest.cpp libsimrecomb ;
 unit-test PopulationTest : PopulationTest.cpp libsimrecomb ;
 unit-test RandomTest : RandomTest.cpp libsimrecomb ;
 unit-test RecombinationMapTest : RecombinationMapTest.cpp libsimrecomb ;
-unit-test SimulatorTest : SimulatorTest.cpp libsimrecomb boost_filesystem boost_system ;
-unit-test SimulationController_NeutralAdmixture_Test : SimulationController_NeutralAdmixture_Test.cpp libsimrecomb boost_filesystem ;
+unit-test SimulatorTest : SimulatorTest.cpp libsimrecomb ;
+unit-test SimulationController_NeutralAdmixture_Test : SimulationController_NeutralAdmixture_Test.cpp libsimrecomb ;
 
 
 run MSFormatTest.cpp libsimrecomb

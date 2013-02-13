@@ -1,5 +1,5 @@
 //
-// SimulationController.hpp
+// SimulationController_NeutralAdmixture_Test.cpp
 //
 // Copyright 2013 Darren Kessner
 //
@@ -17,35 +17,43 @@
 //
 
 
-#ifndef _SIMULATIONCONTROLLER_HPP_
-#define _SIMULATIONCONTROLLER_HPP_
+#include "SimulationController_NeutralAdmixture.hpp"
+#include "unit.hpp"
+#include <iostream>
+#include <iterator>
 
 
-#include "Simulator.hpp"
-#include "boost/shared_ptr.hpp"
-#include <map>
-#include <string>
+using namespace std;
 
 
-using boost::shared_ptr;
+ostream* os_ = 0;
+//ostream* os_ = &cout;
 
 
-class SimulationController
+void test()
 {
-    public:
-
-    typedef std::map<std::string, std::string> Parameters;            
-
-    virtual void example() const = 0;
-    virtual void initialize() = 0;
-    virtual void run() const = 0;
-    virtual void report() const = 0;
-    virtual ~SimulationController() {} 
-};
+    cout << "blah\n";
+}
 
 
-typedef shared_ptr<SimulationController> SimulationControllerPtr;
+int main(int argc, char* argv[])
+{
+    try
+    {
+        if (argc>1 && !strcmp(argv[1],"-v")) os_ = &cout;
+        test();
+        return 0;
+    }
+    catch(exception& e)
+    {
+        cerr << e.what() << endl;
+        return 1;
+    }
+    catch(...)
+    {
+        cerr << "Caught unknown exception.\n";
+        return 1;
+    }
+}
 
-
-#endif //  _SIMULATIONCONTROLLER_HPP_
 

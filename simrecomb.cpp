@@ -17,7 +17,8 @@
 //
 
 
-#include "Simulator.hpp"
+#include "SimulationController_NeutralAdmixture.hpp"
+#include "Simulator.hpp" // TODO: remove
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -107,22 +108,14 @@ int main(int argc, char* argv[])
             string configFilename = argv[2];
             string outputDirectory = argv[3];
 
-            if (!bfs::exists(configFilename))
-                throw runtime_error(("[simrecomb] Config file not found: " + configFilename).c_str());
+            SimulationController::Parameters parameters;
+            parameters["popconfig"] = configFilename;
+            parameters["outdir"] = outputDirectory;
 
-            if (bfs::exists(outputDirectory))
-                throw runtime_error(("[simrecomb] Directory exists: " + outputDirectory).c_str());
+            SimulationControllerPtr controller(new SimulationController_NeutralAdmixture(parameters));
 
-            cout << "Reading configuration file " << configFilename << endl;
-            bfs::ifstream is(configFilename);
-            Simulator::Config config;
-            is >> config;
-            is.close();
-
-            bfs::create_directories(outputDirectory);
-
-            Simulator simulator(config, outputDirectory);
-            simulator.simulate_all();
+            controller->initialize();
+            controller->run();
         }
         else if (subfunction == "example")
         {
