@@ -128,6 +128,8 @@ void test_genotype_harder()
     unit_assert(genotype_homo2 == 2);
     unit_assert(genotype_hetero == 1);
 
+    // test genotype(population)
+
     Organisms organisms;
     organisms.push_back(homo1);
     organisms.push_back(homo2);
