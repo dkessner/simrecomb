@@ -35,7 +35,7 @@ class SimulationController
     virtual void initialize() = 0;
     virtual void run() const = 0;
     virtual void report() const = 0;
-    virtual ~SimulationController {} 
+    virtual ~SimulationController() {} 
 };
 
 
