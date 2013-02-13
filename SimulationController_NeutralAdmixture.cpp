@@ -28,16 +28,14 @@ namespace bfs = boost::filesystem;
 
 SimulationController_NeutralAdmixture::Config::Config(const Parameters& parameters)
 {
-    population_config_filename = parameters.at("popconfig");
-    output_directory = parameters.at("outdir");
+    population_config_filename = parameters.count("popconfig") ? parameters.at("popconfig") : "";
+    output_directory = parameters.count("outdir") ? parameters.at("outdir") : "";
 }
 
 
 SimulationController_NeutralAdmixture::SimulationController_NeutralAdmixture(const Config& config)
 :   config_(config)
-{
-    cout << "we're here\n";
-}
+{}
 
 
 void SimulationController_NeutralAdmixture::example() const
@@ -121,7 +119,5 @@ void SimulationController_NeutralAdmixture::run() const
 void SimulationController_NeutralAdmixture::report() const
 {
 }
-
-
 
 

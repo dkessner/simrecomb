@@ -32,7 +32,7 @@ ostream* os_ = 0;
 
 void test()
 {
-    cout << "blah\n";
+    // TODO: add regression test
 }
 
 
