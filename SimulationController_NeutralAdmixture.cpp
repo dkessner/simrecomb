@@ -38,7 +38,7 @@ SimulationController_NeutralAdmixture::SimulationController_NeutralAdmixture(con
 {}
 
 
-void SimulationController_NeutralAdmixture::example() const
+void SimulationController_NeutralAdmixture::example(const string& output_directory) const
 {   
     Simulator::Config config;
 
@@ -94,6 +94,12 @@ void SimulationController_NeutralAdmixture::example() const
 
 void SimulationController_NeutralAdmixture::initialize()
 {
+    if (config_.output_directory.empty())
+        throw runtime_error("[SimulationController_NeutralAdmixture] No output directory specified (outdir=value).");
+
+    if (config_.population_config_filename.empty())
+        throw runtime_error("[SimulationController_NeutralAdmixture] No population config file specified (popconfig=value).");
+
     if (!bfs::exists(config_.population_config_filename))
         throw runtime_error(("[SimulationController_NeutralAdmixture] Population config file not found: " + config_.population_config_filename).c_str());
 
