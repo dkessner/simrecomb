@@ -36,10 +36,10 @@ class SimulationController
 
     typedef std::map<std::string, std::string> Parameters;            
 
-    virtual void example(const std::string& output_directory) const = 0;
     virtual void initialize() = 0;
     virtual void run() const = 0;
     virtual void report() const = 0;
+    virtual void example(const std::string& output_directory) const = 0;
     virtual ~SimulationController() {} 
 };
 

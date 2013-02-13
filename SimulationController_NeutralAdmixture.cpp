@@ -38,8 +38,50 @@ SimulationController_NeutralAdmixture::SimulationController_NeutralAdmixture(con
 {}
 
 
+void SimulationController_NeutralAdmixture::initialize()
+{
+    if (config_.output_directory.empty())
+        throw runtime_error("[SimulationController_NeutralAdmixture] No output directory specified (outdir=value).");
+
+    if (config_.population_config_filename.empty())
+        throw runtime_error("[SimulationController_NeutralAdmixture] No population config file specified (popconfig=value).");
+
+    if (!bfs::exists(config_.population_config_filename))
+        throw runtime_error(("[SimulationController_NeutralAdmixture] Population config file not found: " + config_.population_config_filename).c_str());
+
+    if (bfs::exists(config_.output_directory))
+        throw runtime_error(("[SimulationController_NeutralAdmixture] Output directory exists: " + config_.output_directory).c_str());
+
+    cout << "[SimulationController_NeutralAdmixture] Reading population configuration file " << config_.population_config_filename << endl;
+    bfs::ifstream is(config_.population_config_filename);
+    is >> simulator_config_;
+    is.close();
+
+    bfs::create_directories(config_.output_directory);
+}
+
+
+void SimulationController_NeutralAdmixture::run() const
+{
+    Simulator simulator(simulator_config_, config_.output_directory);
+    simulator.simulate_all();
+}
+
+
+void SimulationController_NeutralAdmixture::report() const
+{
+}
+
+
 void SimulationController_NeutralAdmixture::example(const string& output_directory) const
 {   
+    bfs::path outdir(config_.output_directory);
+
+    if (bfs::exists(outdir))
+        throw runtime_error(("[SimulationController_NeutralAdmixture] Output directory exists: " + config_.output_directory).c_str());
+
+    bfs::create_directories(outdir);
+
     Simulator::Config config;
 
     const size_t chromosomePairCount_ = 3;
@@ -88,42 +130,14 @@ void SimulationController_NeutralAdmixture::example(const string& output_directo
         config_pop->matingDistribution.push_back(1, make_pair(0,0));
     }
 
-    cout << config;
-}
+    bfs::ofstream os_popconfig(outdir / "popconfig.txt");
+    os_popconfig << config;
+    os_popconfig.close();
 
-
-void SimulationController_NeutralAdmixture::initialize()
-{
-    if (config_.output_directory.empty())
-        throw runtime_error("[SimulationController_NeutralAdmixture] No output directory specified (outdir=value).");
-
-    if (config_.population_config_filename.empty())
-        throw runtime_error("[SimulationController_NeutralAdmixture] No population config file specified (popconfig=value).");
-
-    if (!bfs::exists(config_.population_config_filename))
-        throw runtime_error(("[SimulationController_NeutralAdmixture] Population config file not found: " + config_.population_config_filename).c_str());
-
-    if (bfs::exists(config_.output_directory))
-        throw runtime_error(("[SimulationController_NeutralAdmixture] Output directory exists: " + config_.output_directory).c_str());
-
-    cout << "[SimulationController_NeutralAdmixture] Reading population configuration file " << config_.population_config_filename << endl;
-    bfs::ifstream is(config_.population_config_filename);
-    is >> simulator_config_;
-    is.close();
-
-    bfs::create_directories(config_.output_directory);
-}
-
-
-void SimulationController_NeutralAdmixture::run() const
-{
-    Simulator simulator(simulator_config_, config_.output_directory);
-    simulator.simulate_all();
-}
-
-
-void SimulationController_NeutralAdmixture::report() const
-{
+    bfs::ofstream os_config(outdir / "config.txt");
+    os_config << "outdir = output\n";
+    os_config << "popconfig = popconfig.txt\n";
+    os_config.close();
 }
 
 

@@ -40,6 +40,7 @@ void parse_config_file(const string& filename, SimulationController::Parameters&
     {
         string buffer;
         getline(is, buffer);
+        if (!buffer.empty() && buffer[0] == '#') continue;
         parse_arg(buffer, parameters); // note: recursion
     }
 }

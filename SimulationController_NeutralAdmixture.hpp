@@ -38,10 +38,10 @@ class SimulationController_NeutralAdmixture : public SimulationController
 
     SimulationController_NeutralAdmixture(const Config& config = Config());
 
-    virtual void example(const std::string& output_directory) const;
     virtual void initialize();
     virtual void run() const;
     virtual void report() const;
+    virtual void example(const std::string& output_directory) const;
 
     private:
 
