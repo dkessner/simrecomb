@@ -19,17 +19,11 @@
 
 #include "SimulationController_NeutralAdmixture.hpp"
 #include <iostream>
-#include <cstring>
 #include <fstream>
 #include <sstream>
-//#include <map>
-//#include "boost/filesystem.hpp" // TODO: remove
-//#include "boost/filesystem/fstream.hpp" // TODO: remove
 
 
 using namespace std;
-//using boost::shared_ptr;
-//namespace bfs = boost::filesystem;
 
 
 int main(int argc, char* argv[])
@@ -70,40 +64,6 @@ int main(int argc, char* argv[])
         {
             SimulationControllerPtr controller(new SimulationController_NeutralAdmixture()); // TODO: remove
             controller->example();
-        }
-        else if (subfunction == "txt2pop")
-        {
-            if (argc < 4) throw runtime_error(usage.str().c_str());
-            string filename_in = argv[2];
-            string filename_out = argv[3];
-
-            cout << "reading " << filename_in << endl << flush;
-            ifstream is(filename_in.c_str());
-            if (!is) throw runtime_error(("[simrecomb] Unable to open file " + filename_in).c_str());
-            Population p;
-            is >> p;
-
-            cout << "writing " << filename_out << endl << flush;
-            ofstream os(filename_out.c_str(), ios::binary);
-            p.write(os);
-            os.close();
-        }
-        else if (subfunction == "pop2txt")
-        {
-            if (argc < 4) throw runtime_error(usage.str().c_str());
-            string filename_in = argv[2];
-            string filename_out = argv[3];
-
-            cout << "reading " << filename_in << endl << flush;
-            ifstream is(filename_in.c_str(), ios::binary);
-            if (!is) throw runtime_error(("[simrecomb] Unable to open file " + filename_in).c_str());
-            Population p;
-            p.read(is);
-
-            cout << "writing " << filename_out << endl << flush;
-            ofstream os(filename_out.c_str());
-            os << p;
-            os.close();
         }
         else
         {

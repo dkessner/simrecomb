@@ -74,9 +74,10 @@ run MSFormatTest.cpp libsimrecomb
     ;
 
 
-exe simrecomb : simrecomb.cpp libsimrecomb boost_system boost_filesystem ;
-exe subsample_population : subsample_population.cpp libsimrecomb boost_system boost_filesystem ;
-exe recombine_data : recombine_data.cpp libsimrecomb boost_system boost_filesystem ;
+exe simrecomb : simrecomb.cpp libsimrecomb ;
+exe simrecomb_aux : simrecomb_aux.cpp libsimrecomb ;
+exe subsample_population : subsample_population.cpp libsimrecomb ;
+exe recombine_data : recombine_data.cpp libsimrecomb ;
 
 #exe analyze_population : analyze_population.cpp libsimrecomb boost_system boost_filesystem ;
 #exe john_question : john_question.cpp libsimrecomb boost_system boost_filesystem ;
@@ -84,7 +85,7 @@ exe recombine_data : recombine_data.cpp libsimrecomb boost_system boost_filesyst
 #exe test_map : test_map.cpp libsimrecomb ;
 
 install bin  
-    : simrecomb subsample_population recombine_data
+    : simrecomb simrecomb_aux subsample_population recombine_data
     : <location>bin 
       <install-dependencies>on
       <install-type>EXE
