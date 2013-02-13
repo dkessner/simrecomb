@@ -18,69 +18,18 @@
 
 
 #include "SimulationController_NeutralAdmixture.hpp"
-#include "Simulator.hpp" // TODO: remove
 #include <iostream>
 #include <cstring>
 #include <fstream>
 #include <sstream>
-#include <map>
-#include "boost/filesystem.hpp"
-#include "boost/filesystem/fstream.hpp"
+//#include <map>
+//#include "boost/filesystem.hpp" // TODO: remove
+//#include "boost/filesystem/fstream.hpp" // TODO: remove
 
 
 using namespace std;
-using boost::shared_ptr;
-namespace bfs = boost::filesystem;
-
-
-void initializeExampleSimulatorConfig(Simulator::Config& config)
-{
-    const size_t chromosomePairCount_ = 3;
-    const unsigned int populationSize_ = 10000;
-    const double admixtureProportion_ = .8; // fraction of genes from 1st population
-
-    for (size_t i=0; i<chromosomePairCount_; i++) 
-        config.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
-
-    // generation 0 (ancestral populations)
-
-    config.populationConfigs.push_back(vector<Population::Config>(3));
-
-    Population::Config* config_pop = &config.populationConfigs[0][0];
-    config_pop->size = 0;
-    config_pop->populationID = 0;
-
-    config_pop = &config.populationConfigs[0][1];
-    config_pop->size = populationSize_;
-    config_pop->populationID = 1;
-    config_pop->chromosomePairCount = chromosomePairCount_;
-
-    config_pop = &config.populationConfigs[0][2];
-    config_pop->size = populationSize_;
-    config_pop->populationID = 2;
-    config_pop->chromosomePairCount = chromosomePairCount_;
-
-    // generation 1 (initial admixture)
-
-    config.populationConfigs.push_back(vector<Population::Config>(1));
-
-    config_pop = &config.populationConfigs[1][0];
-    config_pop->size = populationSize_;
-    double p = admixtureProportion_;
-    config_pop->matingDistribution.push_back(p*p, make_pair(1,1));
-    config_pop->matingDistribution.push_back(2*p*(1-p), make_pair(1,2));
-    config_pop->matingDistribution.push_back((1-p)*(1-p), make_pair(2,2));
-
-    // subsequent generations - just recombination
-
-    for (size_t generation=2; generation<8; generation++)
-    {
-        config.populationConfigs.push_back(vector<Population::Config>(1));
-        config_pop = &config.populationConfigs[generation][0];
-        config_pop->size = populationSize_;
-        config_pop->matingDistribution.push_back(1, make_pair(0,0));
-    }
-}
+//using boost::shared_ptr;
+//namespace bfs = boost::filesystem;
 
 
 int main(int argc, char* argv[])
@@ -119,9 +68,8 @@ int main(int argc, char* argv[])
         }
         else if (subfunction == "example")
         {
-            Simulator::Config temp;
-            initializeExampleSimulatorConfig(temp);
-            cout << temp;
+            SimulationControllerPtr controller(new SimulationController_NeutralAdmixture()); // TODO: remove
+            controller->example();
         }
         else if (subfunction == "txt2pop")
         {

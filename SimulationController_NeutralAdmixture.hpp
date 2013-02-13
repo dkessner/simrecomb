@@ -33,10 +33,10 @@ class SimulationController_NeutralAdmixture : public SimulationController
         std::string population_config_filename; // "popconfig"
         std::string output_directory;           // "outdir"
 
-        Config(const Parameters& parameters);
+        Config(const Parameters& parameters = Parameters()); // allows auto conversion: Parameters->Config
     };
 
-    SimulationController_NeutralAdmixture(const Config& config);
+    SimulationController_NeutralAdmixture(const Config& config = Config());
 
     virtual void example() const;
     virtual void initialize();
