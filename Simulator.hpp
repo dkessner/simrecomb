@@ -63,7 +63,7 @@ class Simulator
 
 
 std::ostream& operator<<(std::ostream& os, const Simulator::Config& config);
-std::istream& operator>>(std::istream& is, Simulator::Config& config);
+//std::istream& operator>>(std::istream& is, Simulator::Config& config);
 
 
 #endif //  _SIMULATOR_HPP_

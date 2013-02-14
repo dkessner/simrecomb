@@ -469,3 +469,72 @@ istream& operator>>(istream& is, Population& p)
 }
 
 
+//////////////////////
+
+
+ostream& operator<<(ostream& os, const vector<Population::Configs>& generation_configs)
+{
+    //os << "seed " << config.seed << endl << endl;
+
+    /*
+    os << "geneticMapFilenames " << config.geneticMapFilenames.size() << endl; 
+    for (vector<string>::const_iterator it=config.geneticMapFilenames.begin();
+         it!=config.geneticMapFilenames.end(); ++it)
+        os << "geneticMapFilename " << *it << endl;
+    os << endl;
+    */
+
+    for (size_t i=0; i<generation_configs.size(); i++)
+    {
+        os << "generation " << i << endl;
+        copy(generation_configs[i].begin(), generation_configs[i].end(), 
+             ostream_iterator<Population::Config>(os,"\n"));
+        os << endl;
+    }
+
+    return os;
+}
+
+
+istream& operator>>(istream& is, vector<Population::Configs>& generation_configs)
+{
+    while (is)
+    {
+        // parse line by line
+
+        string buffer;
+        getline(is, buffer);
+        if (!is) return is;
+
+        vector<string> tokens;
+        istringstream iss(buffer);
+        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter(tokens));
+
+        // switch on first token
+
+        if (tokens.empty())
+            continue;
+        /*
+        else if (tokens[0] == "seed" && tokens.size() == 2)
+            config.seed = atoi(tokens[1].c_str());
+        else if (tokens[0] == "geneticMapFilenames")
+            continue;
+        else if (tokens[0] == "geneticMapFilename" && tokens.size()==2)
+            config.geneticMapFilenames.push_back(tokens[1]);
+            */
+        else if (tokens[0] == "generation")
+            generation_configs.push_back(vector<Population::Config>());
+        else if (tokens[0] == "population")
+        {
+            generation_configs.back().push_back(Population::Config());
+            istringstream temp(buffer);
+            temp >> generation_configs.back().back();
+        }
+        else
+            cerr << "Ignoring invalid configuration line:\n" << buffer << endl;
+    }
+
+    return is;
+}
+
+

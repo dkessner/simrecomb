@@ -28,7 +28,9 @@ namespace bfs = boost::filesystem;
 
 SimulationController_NeutralAdmixture::Config::Config(const Parameters& parameters)
 {
+    seed = parameters.count("seed") ? atoi(parameters.at("seed").c_str()) : 0;
     population_config_filename = parameters.count("popconfig") ? parameters.at("popconfig") : "";
+    genetic_map_list_filename = parameters.count("genetic_map_list") ? parameters.at("genetic_map_list") : "";
     output_directory = parameters.count("outdir") ? parameters.at("outdir") : "";
 }
 
@@ -54,8 +56,23 @@ void SimulationController_NeutralAdmixture::initialize()
 
     cout << "[SimulationController_NeutralAdmixture] Reading population configuration file " << config_.population_config_filename << endl;
     bfs::ifstream is(config_.population_config_filename);
-    is >> simulator_config_;
+    is >> simulator_config_.populationConfigs;
     is.close();
+
+    cout << "[SimulationController_NeutralAdmixture] Reading genetic map list " << config_.genetic_map_list_filename << endl;
+    bfs::ifstream is_genetic_map_list(config_.genetic_map_list_filename);
+    copy(istream_iterator<string>(is_genetic_map_list), istream_iterator<string>(), back_inserter(simulator_config_.geneticMapFilenames));
+    is_genetic_map_list.close();
+
+    simulator_config_.seed = config_.seed;
+    
+    cout << "seed: " << config_.seed << endl;
+    cout << "genetic maps:\n";
+    copy(simulator_config_.geneticMapFilenames.begin(), simulator_config_.geneticMapFilenames.end(), ostream_iterator<string>(cout, "\n"));
+    cout << endl;
+
+    
+
 
     bfs::create_directories(config_.output_directory);
 }

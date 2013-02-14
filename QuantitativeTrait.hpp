@@ -28,6 +28,9 @@ class QuantitativeTrait
 {
     public:
 
+    // identifier for the trait -- should be set by whoever instantiates the QuantitativeTrait
+    virtual int id() const = 0;
+
     // return list of loci -- used by Genotyper
     virtual const Loci& loci() const = 0;
 
@@ -55,11 +58,15 @@ class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
 };
 
 
+typedef std::map<int, DataVectorPtr> TraitValueMap;  // map QT id -> trait_values
+typedef shared_ptr<TraitValueMap> TraitValueMapPtr;
+
+
 class FitnessFunction
 {
     public:
 
-    DataVectorPtr calculate_fitness(const DataVectorPtrs& trait_values) const = 0;
+    DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const = 0;
 
     virtual ~FitnessFunction() {}
 };
@@ -69,11 +76,19 @@ class FitnessFunction_Identity : public FitnessFunction
 {
     public:
 
-    DataVectorPtr calculate_fitness(const DataVectorPtrs& trait_values) const
+    FitnessFunction_Identity(int qtid)
+    :   qtid_(qtid)
+    {}
+
+    DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const
     {
-        assert(trait_values.size() == 1);  // -> runtime_error
-        return trait_values[0];
+        assert(trait_values.count(qtid_));  // -> runtime_error
+        return trait_values[qtid_];
     }
+
+    private:
+
+    int qtid_;
 };
 
 

@@ -30,7 +30,9 @@ class SimulationController_NeutralAdmixture : public SimulationController
 
     struct Config
     {
+        int seed;
         std::string population_config_filename; // "popconfig"
+        std::string genetic_map_list_filename;  // "genetic_map_list"
         std::string output_directory;           // "outdir"
 
         Config(const Parameters& parameters = Parameters()); // allows auto conversion: Parameters->Config
