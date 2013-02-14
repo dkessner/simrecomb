@@ -99,38 +99,38 @@ void SimulationController_NeutralAdmixture::example(const string& output_directo
 
     bfs::create_directories(outdir);
 
-    Simulator::Config config;
+    Simulator::Config simconfig;
 
     const size_t chromosomePairCount_ = 3;
     const unsigned int populationSize_ = 10000;
     const double admixtureProportion_ = .8; // fraction of genes from 1st population
 
     for (size_t i=0; i<chromosomePairCount_; i++) 
-        config.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
+        simconfig.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
 
     // generation 0 (ancestral populations)
 
-    config.populationConfigs.push_back(vector<Population::Config>(3));
+    simconfig.populationConfigs.push_back(vector<Population::Config>(3));
 
-    Population::Config* config_pop = &config.populationConfigs[0][0];
+    Population::Config* config_pop = &simconfig.populationConfigs[0][0];
     config_pop->size = 0;
     config_pop->populationID = 0;
 
-    config_pop = &config.populationConfigs[0][1];
+    config_pop = &simconfig.populationConfigs[0][1];
     config_pop->size = populationSize_;
     config_pop->populationID = 1;
     config_pop->chromosomePairCount = chromosomePairCount_;
 
-    config_pop = &config.populationConfigs[0][2];
+    config_pop = &simconfig.populationConfigs[0][2];
     config_pop->size = populationSize_;
     config_pop->populationID = 2;
     config_pop->chromosomePairCount = chromosomePairCount_;
 
     // generation 1 (initial admixture)
 
-    config.populationConfigs.push_back(vector<Population::Config>(1));
+    simconfig.populationConfigs.push_back(vector<Population::Config>(1));
 
-    config_pop = &config.populationConfigs[1][0];
+    config_pop = &simconfig.populationConfigs[1][0];
     config_pop->size = populationSize_;
     double p = admixtureProportion_;
     config_pop->matingDistribution.push_back(p*p, make_pair(1,1));
@@ -141,19 +141,28 @@ void SimulationController_NeutralAdmixture::example(const string& output_directo
 
     for (size_t generation=2; generation<8; generation++)
     {
-        config.populationConfigs.push_back(vector<Population::Config>(1));
-        config_pop = &config.populationConfigs[generation][0];
+        simconfig.populationConfigs.push_back(vector<Population::Config>(1));
+        config_pop = &simconfig.populationConfigs[generation][0];
         config_pop->size = populationSize_;
         config_pop->matingDistribution.push_back(1, make_pair(0,0));
     }
 
+    // write out configuration files
+
     bfs::ofstream os_popconfig(outdir / "popconfig.txt");
-    os_popconfig << config;
+    os_popconfig << simconfig.populationConfigs;
     os_popconfig.close();
+
+    bfs::ofstream os_genetic_map_list(outdir / "genetic_map_list.txt");
+    copy(simconfig.geneticMapFilenames.begin(), simconfig.geneticMapFilenames.end(), 
+         ostream_iterator<string>(os_genetic_map_list, "\n"));
+    os_genetic_map_list.close();
 
     bfs::ofstream os_config(outdir / "config.txt");
     os_config << "outdir = output\n";
+    os_config << "seed = 0\n";
     os_config << "popconfig = popconfig.txt\n";
+    os_config << "genetic_map_list = genetic_map_list.txt\n";
     os_config.close();
 }
 
