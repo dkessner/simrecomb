@@ -146,6 +146,7 @@ std::ostream& operator<<(std::ostream& os, const Population& p);
 std::istream& operator>>(std::istream& is, Population& p);
 
 
+// multiple generations: each generation has Population::Configs, one Config per population
 std::ostream& operator<<(std::ostream& os, const std::vector<Population::Configs>& generation_configs);
 std::istream& operator>>(std::istream& is, std::vector<Population::Configs>& generation_configs);
 

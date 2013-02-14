@@ -30,73 +30,6 @@ namespace bfs = boost::filesystem;
 
 
 //
-// Simulator::Config
-//
-
-
-ostream& operator<<(ostream& os, const Simulator::Config& config)
-{
-    os << "seed " << config.seed << endl << endl;
-
-    os << "geneticMapFilenames " << config.geneticMapFilenames.size() << endl; 
-    for (vector<string>::const_iterator it=config.geneticMapFilenames.begin();
-         it!=config.geneticMapFilenames.end(); ++it)
-        os << "geneticMapFilename " << *it << endl;
-    os << endl;
-
-    for (size_t i=0; i<config.populationConfigs.size(); i++)
-    {
-        os << "generation " << i << endl;
-        copy(config.populationConfigs[i].begin(), config.populationConfigs[i].end(), 
-             ostream_iterator<Population::Config>(os,"\n"));
-        os << endl;
-    }
-
-    return os;
-}
-
-
-istream& operator>>(istream& is, Simulator::Config& config)
-{
-    while (is)
-    {
-        // parse line by line
-
-        string buffer;
-        getline(is, buffer);
-        if (!is) return is;
-
-        vector<string> tokens;
-        istringstream iss(buffer);
-        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter(tokens));
-
-        // switch on first token
-
-        if (tokens.empty())
-            continue;
-        else if (tokens[0] == "seed" && tokens.size() == 2)
-            config.seed = atoi(tokens[1].c_str());
-        else if (tokens[0] == "geneticMapFilenames")
-            continue;
-        else if (tokens[0] == "geneticMapFilename" && tokens.size()==2)
-            config.geneticMapFilenames.push_back(tokens[1]);
-        else if (tokens[0] == "generation")
-            config.populationConfigs.push_back(vector<Population::Config>());
-        else if (tokens[0] == "population")
-        {
-            config.populationConfigs.back().push_back(Population::Config());
-            istringstream temp(buffer);
-            temp >> config.populationConfigs.back().back();
-        }
-        else
-            cerr << "Ignoring invalid configuration line:\n" << buffer << endl;
-    }
-
-    return is;
-}
-
-
-//
 // Simulator
 //
 
@@ -109,12 +42,6 @@ Simulator::Simulator(const Config& config,
     current_generation_(0), current_populations_(new Populations)
 {
     cout << "[Simulator] Initializing.\n";
-
-    // write config file used
-
-    bfs::ofstream os_config(output_directory_ / "simrecomb_config.txt");
-    os_config  << config;
-    os_config.close();
 
     // initialize recombination maps
 

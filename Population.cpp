@@ -469,21 +469,8 @@ istream& operator>>(istream& is, Population& p)
 }
 
 
-//////////////////////
-
-
 ostream& operator<<(ostream& os, const vector<Population::Configs>& generation_configs)
 {
-    //os << "seed " << config.seed << endl << endl;
-
-    /*
-    os << "geneticMapFilenames " << config.geneticMapFilenames.size() << endl; 
-    for (vector<string>::const_iterator it=config.geneticMapFilenames.begin();
-         it!=config.geneticMapFilenames.end(); ++it)
-        os << "geneticMapFilename " << *it << endl;
-    os << endl;
-    */
-
     for (size_t i=0; i<generation_configs.size(); i++)
     {
         os << "generation " << i << endl;
@@ -514,14 +501,6 @@ istream& operator>>(istream& is, vector<Population::Configs>& generation_configs
 
         if (tokens.empty())
             continue;
-        /*
-        else if (tokens[0] == "seed" && tokens.size() == 2)
-            config.seed = atoi(tokens[1].c_str());
-        else if (tokens[0] == "geneticMapFilenames")
-            continue;
-        else if (tokens[0] == "geneticMapFilename" && tokens.size()==2)
-            config.geneticMapFilenames.push_back(tokens[1]);
-            */
         else if (tokens[0] == "generation")
             generation_configs.push_back(vector<Population::Config>());
         else if (tokens[0] == "population")
