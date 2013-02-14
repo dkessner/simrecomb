@@ -24,6 +24,7 @@
 #include <iterator>
 #include <set>
 #include <fstream>
+#include <cmath>
 
 
 using namespace std;
@@ -72,7 +73,9 @@ const MatingDistribution::IndexPair& MatingDistribution::random_index_pair(const
 
 bool operator==(const MatingDistribution::Entry& a, const MatingDistribution::Entry& b)
 {
-    return a.cumulativeWeight == b.cumulativeWeight &&
+    const double epsilon = 1e-12;
+
+    return (fabs(a.cumulativeWeight-b.cumulativeWeight)<epsilon) &&
            a.indexPair.first == b.indexPair.first &&
            a.indexPair.second == b.indexPair.second;
 }

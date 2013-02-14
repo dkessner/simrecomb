@@ -404,6 +404,67 @@ void testPopulation_fitness_constructor_2()
 }
 
 
+void test_generation_IO()
+{
+    vector<Population::Configs> populationConfigs;
+
+    const size_t chromosomePairCount_ = 3;
+    const unsigned int populationSize_ = 10000;
+    const double admixtureProportion_ = .8; // fraction of genes from 1st population
+
+    // generation 0 (ancestral populations)
+
+    populationConfigs.push_back(vector<Population::Config>(3));
+
+    Population::Config* config_pop = &populationConfigs[0][0];
+    config_pop->size = 0;
+    config_pop->populationID = 0;
+
+    config_pop = &populationConfigs[0][1];
+    config_pop->size = populationSize_;
+    config_pop->populationID = 1;
+    config_pop->chromosomePairCount = chromosomePairCount_;
+
+    config_pop = &populationConfigs[0][2];
+    config_pop->size = populationSize_;
+    config_pop->populationID = 2;
+    config_pop->chromosomePairCount = chromosomePairCount_;
+
+    // generation 1 (initial admixture)
+
+    populationConfigs.push_back(vector<Population::Config>(1));
+
+    config_pop = &populationConfigs[1][0];
+    config_pop->size = populationSize_;
+    double p = admixtureProportion_;
+    config_pop->matingDistribution.push_back(p*p, make_pair(1,1));
+    config_pop->matingDistribution.push_back(2*p*(1-p), make_pair(1,2));
+    config_pop->matingDistribution.push_back((1-p)*(1-p), make_pair(2,2));
+
+    // subsequent generations - just recombination
+
+    for (size_t generation=2; generation<8; generation++)
+    {
+        populationConfigs.push_back(vector<Population::Config>(1));
+        config_pop = &populationConfigs[generation][0];
+        config_pop->size = populationSize_;
+        config_pop->matingDistribution.push_back(1, make_pair(0,0));
+    }
+
+    // write/read test 
+
+    ostringstream oss;
+    oss << populationConfigs;
+
+    vector<Population::Configs> populationConfigs2;
+    unit_assert(populationConfigs != populationConfigs2);
+
+    istringstream iss(oss.str());
+    iss >> populationConfigs2;
+    unit_assert(populationConfigs == populationConfigs2);
+}
+
+
 void test()
 {
     testMatingDistribution();
@@ -414,6 +475,7 @@ void test()
     testPopulationIO_Binary();
     testPopulation_fitness_constructor();
     testPopulation_fitness_constructor_2();
+    test_generation_IO();
 }
 
 
