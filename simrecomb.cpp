@@ -88,8 +88,8 @@ void parse_command_line(int argc, char* argv[], string& simname, SimulationContr
     ostringstream usage;
     usage << "Usage: simrecomb <simname> [args]\n";
     usage << endl;
-    usage << "Available simnames:\n";
-    usage << "    neutral_admixture\n";
+    usage << "Available simnames (abbreviation):\n";
+    usage << "    neutral_admixture (na)\n";
     usage << endl;
     usage << "Create and run example for <simname>:\n";
     usage << "    simrecomb <simname> example outdir=<dirname>   # creates config files\n";
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 
         SimulationControllerPtr controller;
        
-        if (simname ==  "neutral_admixture")
+        if (simname == "neutral_admixture" || simname == "na")
         {
             controller = SimulationControllerPtr(new SimulationController_NeutralAdmixture(parameters));
         }
