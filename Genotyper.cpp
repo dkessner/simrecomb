@@ -27,7 +27,7 @@ unsigned int Genotyper::genotype(const Locus& locus,
     const ChromosomePair& cp = organism.chromosomePairs()[locus.chromosome_pair_index];
     const DNABlock& block0 = cp.first.find_block(locus.position);
     const DNABlock& block1 = cp.second.find_block(locus.position);
-    return indicator(locus.position, block0.id) + indicator(locus.position, block1.id);
+    return indicator(block0.id, locus) + indicator(block1.id, locus);
 
     // TODO: add support for parallel iteration with a block index hint
 }

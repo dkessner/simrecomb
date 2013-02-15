@@ -34,10 +34,10 @@ class SNPIndicator_Test : public SNPIndicator
 {
     public:
 
-    virtual unsigned int operator()(unsigned int position, unsigned int id) const
+    virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const
     {
-        Chromosome::ID chromosome_id(id);
-        return (chromosome_id.population == 0) ? 0 : 1;
+        Chromosome::ID id(chromosome_id);
+        return (id.population == 0) ? 0 : 1;
     }
 };
 

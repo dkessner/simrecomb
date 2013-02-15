@@ -81,8 +81,15 @@ class SNPIndicator
     public:
 
     // return value in {0, 1}
-    virtual unsigned int operator()(unsigned int position, unsigned int chromosome_id) const = 0;
+    virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const = 0;
     virtual ~SNPIndicator() {}
+};
+
+
+class SNPIndicator_Trivial : public SNPIndicator
+{
+    public:
+    virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const {return 0;}
 };
 
 
