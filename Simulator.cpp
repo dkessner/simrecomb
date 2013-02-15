@@ -52,19 +52,6 @@ Simulator::Simulator(const Config& config,
 }
 
 
-void printPopulations(ostream& os, const Populations& populations, const string& label)
-{
-    os << "<" << label << ">\n";
-    for (size_t i=0; i<populations.size(); i++)
-    {
-        os << "<population" << i << ">\n" 
-             << *populations[i]
-             << "</population" << i << ">\n";
-    }
-    os << "</" << label << ">\n";
-}
-
-
 void Simulator::simulate_single_generation(ostream* os_log)
 {
     if (!current_populations_.get())
