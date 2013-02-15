@@ -22,11 +22,8 @@
 
 #include "DataVector.hpp"
 #include "Organism.hpp"
-#include "boost/shared_ptr.hpp"
+#include "shared_ptr.hpp"
 #include <vector>
-
-
-using boost::shared_ptr;
 
 
 class MatingDistribution
@@ -108,7 +105,7 @@ class Population
     const std::vector<Organism>& organisms() const {return organisms_;}
     size_t size() const {return organisms_.size();}
 
-    boost::shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
+    shared_ptr<Population> randomSubsample(size_t size, Random& random) const;
 
     // binary read/write
 

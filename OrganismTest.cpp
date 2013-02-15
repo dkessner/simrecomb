@@ -24,7 +24,6 @@
 
 
 using namespace std;
-using boost::shared_ptr;
 
 
 ostream* os_ = 0;

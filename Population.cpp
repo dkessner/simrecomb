@@ -16,6 +16,7 @@
 //   limitations under the License.
 //
 
+
 #include "Population.hpp"
 #include "Random.hpp"
 #include <stdexcept>
@@ -28,7 +29,6 @@
 
 
 using namespace std;
-using boost::shared_ptr;
 
 
 //

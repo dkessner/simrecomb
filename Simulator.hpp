@@ -22,6 +22,7 @@
 
 
 #include "Population.hpp"
+#include "QuantitativeTrait.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
 #include <vector>

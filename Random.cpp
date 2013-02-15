@@ -20,7 +20,6 @@
 #include "boost/random.hpp"
 
 
-using boost::shared_ptr;
 using namespace std;
 
 

@@ -22,12 +22,9 @@
 
 
 #include "Population.hpp"
-#include "boost/shared_ptr.hpp"
+#include "shared_ptr.hpp"
 #include <vector>
 #include <map>
-
-
-using boost::shared_ptr;
 
 
 struct Locus

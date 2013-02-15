@@ -28,7 +28,6 @@
 
 
 using namespace std;
-using boost::shared_ptr;
 namespace bfs = boost::filesystem;
 
 

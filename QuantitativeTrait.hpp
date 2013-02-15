@@ -21,7 +21,9 @@
 #define _QUANTITATIVETRAIT_HPP_
 
 
+#include "Genotyper.hpp"
 #include "DataVector.hpp"
+#include "shared_ptr.hpp"
 
 
 class QuantitativeTrait
@@ -39,6 +41,9 @@ class QuantitativeTrait
 
     virtual ~QuantitativeTrait() {}
 };
+
+
+typedef shared_ptr<QuantitativeTrait> QuantitativeTraitPtr;
 
 
 class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
@@ -66,8 +71,7 @@ class FitnessFunction
 {
     public:
 
-    DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const = 0;
-
+    virtual DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const = 0;
     virtual ~FitnessFunction() {}
 };
 
@@ -83,7 +87,7 @@ class FitnessFunction_Identity : public FitnessFunction
     DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const
     {
         assert(trait_values.count(qtid_));  // -> runtime_error
-        return trait_values[qtid_];
+        return trait_values.at(qtid_);
     }
 
     private:

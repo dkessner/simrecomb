@@ -23,7 +23,7 @@
 #include "Random.hpp"
 #include "Chromosome.hpp"
 #include "RecombinationMap.hpp"
-#include "boost/shared_ptr.hpp"
+#include "shared_ptr.hpp"
 #include <vector>
 
 
@@ -69,7 +69,7 @@ class RecombinationPositionGenerator_RecombinationMap : public RecombinationPosi
 
     private:
     const Random& random_;
-    std::vector< boost::shared_ptr<RecombinationMap> > recombinationMaps_;
+    std::vector< shared_ptr<RecombinationMap> > recombinationMaps_;
 };
 
 
@@ -77,7 +77,7 @@ class Organism
 {
     public:
 
-    static boost::shared_ptr<RecombinationPositionGenerator> recombinationPositionGenerator_;
+    static shared_ptr<RecombinationPositionGenerator> recombinationPositionGenerator_;
 
     typedef std::vector<Chromosome> Gamete;
 

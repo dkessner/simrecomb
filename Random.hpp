@@ -20,7 +20,7 @@
 #define _RANDOM_HPP_
 
 
-#include "boost/shared_ptr.hpp"
+#include "shared_ptr.hpp"
 
 
 //
@@ -47,7 +47,7 @@ class Random
 
     private:
     class Impl;
-    boost::shared_ptr<Impl> impl_;
+    shared_ptr<Impl> impl_;
 };
 
 

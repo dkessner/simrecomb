@@ -1,5 +1,5 @@
 //
-// SimulationController.hpp
+// shared_ptr.hpp
 //
 // Copyright 2013 Darren Kessner
 //
@@ -17,32 +17,18 @@
 //
 
 
-#ifndef _SIMULATIONCONTROLLER_HPP_
-#define _SIMULATIONCONTROLLER_HPP_
+#ifndef _SHARED_PTR_HPP_
+#define _SHARED_PTR_HPP_
 
 
-#include "Simulator.hpp"
-#include "shared_ptr.hpp"
-#include <map>
-#include <string>
+// use a single shared_ptr implementation consistently (e.g. boost, tr1, C++11)
+// and facilitate switching implementations
 
 
-class SimulationController
-{
-    public:
+#include "boost/shared_ptr.hpp"
 
-    typedef std::map<std::string, std::string> Parameters;            
-
-    virtual void initialize() = 0;
-    virtual void run() const = 0;
-    virtual void report() const = 0;
-    virtual void example(const std::string& output_directory) const = 0;
-    virtual ~SimulationController() {} 
-};
+using boost::shared_ptr;
 
 
-typedef shared_ptr<SimulationController> SimulationControllerPtr;
-
-
-#endif //  _SIMULATIONCONTROLLER_HPP_
+#endif // _SHARED_PTR_HPP_
 

@@ -21,12 +21,9 @@
 #define _DATAVECTOR_HPP_
 
 
+#include "shared_ptr.hpp"
 #include <iosfwd>
 #include <vector>
-#include "boost/shared_ptr.hpp"
-
-
-using boost::shared_ptr;
 
 
 class DataVector;
