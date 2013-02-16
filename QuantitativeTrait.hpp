@@ -24,6 +24,7 @@
 #include "Genotyper.hpp"
 #include "DataVector.hpp"
 #include "shared_ptr.hpp"
+#include <stdexcept>
 
 
 class QuantitativeTrait
@@ -86,13 +87,22 @@ class FitnessFunction_Identity : public FitnessFunction
 
     DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const
     {
-        assert(trait_values.count(qtid_));  // -> runtime_error
+        if (!trait_values.count(qtid_))
+            throw std::runtime_error("[FitnessFunction_Identity] Quantitative trait id not found.");
         return trait_values.at(qtid_);
     }
 
     private:
 
     int qtid_;
+};
+
+
+struct PopulationData
+{
+    GenotypeMapPtr genotypes;
+    TraitValueMapPtr trait_values;
+    DataVectorPtr fitnesses;
 };
 
 

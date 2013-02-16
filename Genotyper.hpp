@@ -48,29 +48,17 @@ inline bool operator<(const Locus& a, const Locus& b)
 }
 
 
-class GenotypeData : public std::vector<char>
+class GenotypeData : public std::vector<char> // {0,1,2} for each individual
 {
     public:
 
     double allele_frequency() const;
 };
 
+
 typedef shared_ptr<GenotypeData> GenotypeDataPtr;
-
-
 typedef std::map<Locus, GenotypeDataPtr> GenotypeMap;
 typedef shared_ptr<GenotypeMap> GenotypeMapPtr;
-typedef std::vector<GenotypeMapPtr> GenotypeMapPtrs;
-
-
-/*
-struct PopulationData
-{
-    std::map<Locus, DataVectorPtr> genotypes;
-    std::vector<DataVectorPtr> trait_values;
-    DataVectorPtr fitness;
-};
-*/
 
 
 class SNPIndicator
@@ -81,6 +69,9 @@ class SNPIndicator
     virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const = 0;
     virtual ~SNPIndicator() {}
 };
+
+
+typedef shared_ptr<SNPIndicator> SNPIndicatorPtr;
 
 
 class SNPIndicator_Trivial : public SNPIndicator
