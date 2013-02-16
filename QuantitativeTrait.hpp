@@ -31,16 +31,25 @@ class QuantitativeTrait
 {
     public:
 
+    QuantitativeTrait(int id)
+    :   id_(id)
+    {}
+
     // identifier for the trait -- should be set by whoever instantiates the QuantitativeTrait
-    virtual int id() const = 0;
+    int id() const {return id_;}
 
-    // return list of loci -- used by Genotyper
-    virtual const Loci& loci() const = 0;
+    // return set of loci (the QTLs contributing to the trait)
+    const Loci& loci() const {return loci_;}
 
-    // calculate trait values for a single population using genotype map
-    virtual DataVectorPtr calculate_trait_values(GenotypeMapPtr genotype_map) const = 0;
+    // calculate trait values for a single population using genotypes
+    virtual DataVectorPtr calculate_trait_values(GenotypeMapPtr genotypes) const = 0;
 
     virtual ~QuantitativeTrait() {}
+
+    protected:
+
+    int id_;
+    Loci loci_;
 };
 
 
@@ -52,14 +61,15 @@ class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
 {
     public:
 
-    virtual const Loci& loci() const {return loci_;}
+    QuantitativeTrait_SingleLocusFitness(int id)
+    :   QuantitativeTrait(id)
+    {}
 
     // transform {0, 1, 2} -> {1, 1+hs, 1+2s}
     virtual DataVectorPtr calculate_trait_values(GenotypeMapPtr genotype_map) const;
 
     private:
 
-    Loci loci_; // vector with a single locus
     double s_; // selection coefficient
     double h_; // dominance
 };
@@ -122,6 +132,7 @@ struct PopulationData
 
 
 typedef std::vector<PopulationData> PopulationDatas;
+typedef shared_ptr<PopulationDatas> PopulationDatasPtr;
 
 
 class Reporter

@@ -59,9 +59,11 @@ class Simulator
 
     Config config_;
     Random random_;
+    Genotyper genotyper_;
 
     size_t current_generation_;
     PopulationsPtr current_populations_;
+    PopulationDatasPtr current_population_datas_;
 };
 
 

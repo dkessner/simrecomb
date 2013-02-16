@@ -35,8 +35,11 @@ namespace bfs = boost::filesystem;
 
 
 Simulator::Simulator(const Config& config)
-:   config_(config), random_(config.seed),
-    current_generation_(0), current_populations_(new Populations)
+:   config_(config), 
+    random_(config.seed),
+    current_generation_(0), 
+    current_populations_(new Populations),
+    current_population_datas_(new PopulationDatas)
 {
     cout << "[Simulator] Initializing.\n";
 
@@ -59,6 +62,8 @@ Simulator::Simulator(const Config& config)
 
 void Simulator::simulate_single_generation(ostream* os_log)
 {
+    // sanity checks
+
     if (!current_populations_.get())
         throw runtime_error("[Simulator::simulate_single_generation()] Null pointer.");
 
@@ -67,14 +72,66 @@ void Simulator::simulate_single_generation(ostream* os_log)
 
     if (config_.os_progress) *config_.os_progress << "[Simulator] Generation " << current_generation_ << endl;
 
-    DataVectorPtrs dummy_fitnesses(current_populations_->size()); 
+    // create next generation
 
-    PopulationsPtr next = Population::create_populations(
-        config_.population_configs[current_generation_], *current_populations_, dummy_fitnesses, random_);
+    DataVectorPtrs fitnesses;
+    for (PopulationDatas::const_iterator popdata=current_population_datas_->begin();
+         popdata!=current_population_datas_->end(); ++popdata)
+        fitnesses.push_back(popdata->fitnesses);
 
-    if (os_log) *os_log << current_generation_ << endl;
+    PopulationsPtr next_populations = Population::create_populations(
+        config_.population_configs[current_generation_], *current_populations_, fitnesses, random_);
 
-    current_populations_ = next;
+    // collect data on the populations
+
+    PopulationDatasPtr next_population_datas(new PopulationDatas(next_populations->size()));
+
+    // calculate genotypes
+
+    Loci loci_all;
+
+    for (QuantitativeTraitPtrs::const_iterator qt=config_.quantitative_traits.begin();
+         qt!=config_.quantitative_traits.end(); ++qt)
+    {
+        const Loci& loci = (*qt)->loci();
+        for (Loci::const_iterator locus=loci.begin(); locus!=loci.end(); ++locus)
+            loci_all.insert(*locus);
+    }
+
+    Populations::const_iterator population = next_populations->begin();
+    for (PopulationDatas::iterator popdata=next_population_datas->begin();
+         popdata!=next_population_datas->end(); ++popdata, ++population)
+    {
+         popdata->genotypes = genotyper_.genotype(loci_all, **population, *config_.snp_indicator);
+    }
+
+    // calculate quantitative trait values
+
+    for (PopulationDatas::iterator popdata=next_population_datas->begin();
+         popdata!=next_population_datas->end(); ++popdata)
+    {
+        for (QuantitativeTraitPtrs::const_iterator qt=config_.quantitative_traits.begin();
+             qt!=config_.quantitative_traits.end(); ++qt)
+        {
+            (*popdata->trait_values)[(*qt)->id()] = (*qt)->calculate_trait_values(popdata->genotypes);            
+        }
+    }
+
+    // calculate fitnesses
+
+    for (PopulationDatas::iterator popdata=next_population_datas->begin();
+         popdata!=next_population_datas->end(); ++popdata)
+    {
+         popdata->fitnesses = config_.fitness_function->calculate_fitness(*popdata->trait_values);
+    }
+
+    // update
+
+    // TODO: remove once Reporters are working and we have good regression test
+    if (os_log) *os_log << current_generation_ << endl; 
+
+    current_populations_ = next_populations;
+    current_population_datas_ = next_population_datas;
     ++current_generation_;
 }
 
