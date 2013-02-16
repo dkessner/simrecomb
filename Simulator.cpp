@@ -34,11 +34,8 @@ namespace bfs = boost::filesystem;
 //
 
 
-Simulator::Simulator(const Config& config, 
-                     const string& output_directory, 
-                     ostream* os_progress)
+Simulator::Simulator(const Config& config)
 :   config_(config), random_(config.seed),
-    output_directory_(output_directory), os_progress_(os_progress),
     current_generation_(0), current_populations_(new Populations)
 {
     cout << "[Simulator] Initializing.\n";
@@ -48,7 +45,7 @@ Simulator::Simulator(const Config& config,
     cout << "[Simulator] Initializing recombination maps.\n";
     Organism::recombinationPositionGenerator_ =
         shared_ptr<RecombinationPositionGenerator>(
-            new RecombinationPositionGenerator_RecombinationMap(config.geneticMapFilenames, random_));
+            new RecombinationPositionGenerator_RecombinationMap(config.genetic_map_filenames, random_));
 }
 
 
@@ -57,15 +54,15 @@ void Simulator::simulate_single_generation(ostream* os_log)
     if (!current_populations_.get())
         throw runtime_error("[Simulator::simulate_single_generation()] Null pointer.");
 
-    if (current_generation_ >= config_.populationConfigs.size())
+    if (current_generation_ >= config_.population_configs.size())
         throw runtime_error("[Simulator::simulate_single_generation()] Population config not specified.");
 
-    if (os_progress_) *os_progress_ << "[Simulator] Generation " << current_generation_ << endl;
+    if (config_.os_progress) *config_.os_progress << "[Simulator] Generation " << current_generation_ << endl;
 
     DataVectorPtrs dummy_fitnesses(current_populations_->size()); 
 
     PopulationsPtr next = Population::create_populations(
-        config_.populationConfigs[current_generation_], *current_populations_, dummy_fitnesses, random_);
+        config_.population_configs[current_generation_], *current_populations_, dummy_fitnesses, random_);
 
     if (os_log) *os_log << current_generation_ << endl;
 
@@ -76,9 +73,11 @@ void Simulator::simulate_single_generation(ostream* os_log)
 
 void Simulator::simulate_all()
 {
-    bfs::ofstream os_log(output_directory_ / "log.txt");
+    bfs::path output_directory(config_.output_directory);
 
-    const size_t generation_count = config_.populationConfigs.size();
+    bfs::ofstream os_log(output_directory / "log.txt");
+
+    const size_t generation_count = config_.population_configs.size();
     for (size_t generation=0; generation<generation_count; generation++)
     {
         simulate_single_generation(&os_log);
@@ -92,7 +91,7 @@ void Simulator::simulate_all()
     {
         ostringstream filename;
         filename << "pop" << i << ".txt"; 
-        bfs::ofstream os_pop(output_directory_ / filename.str());
+        bfs::ofstream os_pop(output_directory / filename.str());
         os_pop << *(*current_populations_)[i];
     }
 }

@@ -36,16 +36,16 @@ class Simulator
 
     struct Config
     {
-        unsigned int seed;
-        std::vector<std::string> geneticMapFilenames;     // one filename for each chromosome pair
-        std::vector<Population::Configs> populationConfigs; // Population::Configs for each generation
+        unsigned int seed;                                      // for Random
+        std::vector<std::string> genetic_map_filenames;         // one filename for each chromosome pair
+        std::vector<Population::Configs> population_configs;    // Population::Configs for each generation
+        std::string output_directory;                           // all output files placed here
+        std::ostream* os_progress;                              // progress update stream (default: stdout)
 
-        Config() : seed(0) {}
+        Config() : seed(0), os_progress(&std::cout) {}
     };
 
-    Simulator(const Config& config, 
-              const std::string& output_directory,      // all output placed here
-              std::ostream* os_progress = &std::cout);  // progress update stream (default: stdout)
+    Simulator(const Config& config);  
 
     void simulate_single_generation(std::ostream* os_log = 0);
     void simulate_all();
@@ -55,12 +55,12 @@ class Simulator
     Config config_;
     Random random_;
 
-    boost::filesystem::path output_directory_;
-    std::ostream* os_progress_;
-
     size_t current_generation_;
     PopulationsPtr current_populations_;
 };
+
+
+typedef shared_ptr<Simulator> SimulatorPtr;
 
 
 #endif //  _SIMULATOR_HPP_

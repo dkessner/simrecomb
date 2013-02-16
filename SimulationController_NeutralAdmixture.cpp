@@ -42,6 +42,8 @@ SimulationController_NeutralAdmixture::SimulationController_NeutralAdmixture(con
 
 void SimulationController_NeutralAdmixture::initialize()
 {
+    // check parameters
+
     if (config_.output_directory.empty())
         throw runtime_error("[SimulationController_NeutralAdmixture] No output directory specified (outdir=value).");
 
@@ -54,25 +56,32 @@ void SimulationController_NeutralAdmixture::initialize()
     if (bfs::exists(config_.output_directory))
         throw runtime_error(("[SimulationController_NeutralAdmixture] Output directory exists: " + config_.output_directory).c_str());
 
+    // read configuration files
+
     cout << "[SimulationController_NeutralAdmixture] Reading population configuration file " << config_.population_config_filename << endl;
     bfs::ifstream is(config_.population_config_filename);
-    is >> simulator_config_.populationConfigs;
+    is >> simulator_config_.population_configs;
     is.close();
 
     cout << "[SimulationController_NeutralAdmixture] Reading genetic map list " << config_.genetic_map_list_filename << endl;
     bfs::ifstream is_genetic_map_list(config_.genetic_map_list_filename);
-    copy(istream_iterator<string>(is_genetic_map_list), istream_iterator<string>(), back_inserter(simulator_config_.geneticMapFilenames));
+    copy(istream_iterator<string>(is_genetic_map_list), istream_iterator<string>(), back_inserter(simulator_config_.genetic_map_filenames));
     is_genetic_map_list.close();
+
+    // initialize simulator
 
     simulator_config_.seed = config_.seed;
     
     cout << "seed: " << config_.seed << endl;
     cout << "genetic maps:\n";
-    copy(simulator_config_.geneticMapFilenames.begin(), simulator_config_.geneticMapFilenames.end(), ostream_iterator<string>(cout, "\n"));
+    copy(simulator_config_.genetic_map_filenames.begin(), simulator_config_.genetic_map_filenames.end(), ostream_iterator<string>(cout, "\n"));
     cout << endl;
 
-    
+    simulator_config_.output_directory = config_.output_directory;    
 
+    simulator_ = SimulatorPtr(new Simulator(simulator_config_));
+
+    // other initialization
 
     bfs::create_directories(config_.output_directory);
 }
@@ -80,8 +89,7 @@ void SimulationController_NeutralAdmixture::initialize()
 
 void SimulationController_NeutralAdmixture::run() const
 {
-    Simulator simulator(simulator_config_, config_.output_directory);
-    simulator.simulate_all();
+    simulator_->simulate_all();
 }
 
 
@@ -106,31 +114,31 @@ void SimulationController_NeutralAdmixture::example(const string& output_directo
     const double admixtureProportion_ = .8; // fraction of genes from 1st population
 
     for (size_t i=0; i<chromosomePairCount_; i++) 
-        simconfig.geneticMapFilenames.push_back("genetic_map_chr21_b36.txt"); // hack
+        simconfig.genetic_map_filenames.push_back("genetic_map_chr21_b36.txt"); // hack
 
     // generation 0 (ancestral populations)
 
-    simconfig.populationConfigs.push_back(vector<Population::Config>(3));
+    simconfig.population_configs.push_back(vector<Population::Config>(3));
 
-    Population::Config* config_pop = &simconfig.populationConfigs[0][0];
+    Population::Config* config_pop = &simconfig.population_configs[0][0];
     config_pop->size = 0;
     config_pop->populationID = 0;
 
-    config_pop = &simconfig.populationConfigs[0][1];
+    config_pop = &simconfig.population_configs[0][1];
     config_pop->size = populationSize_;
     config_pop->populationID = 1;
     config_pop->chromosomePairCount = chromosomePairCount_;
 
-    config_pop = &simconfig.populationConfigs[0][2];
+    config_pop = &simconfig.population_configs[0][2];
     config_pop->size = populationSize_;
     config_pop->populationID = 2;
     config_pop->chromosomePairCount = chromosomePairCount_;
 
     // generation 1 (initial admixture)
 
-    simconfig.populationConfigs.push_back(vector<Population::Config>(1));
+    simconfig.population_configs.push_back(vector<Population::Config>(1));
 
-    config_pop = &simconfig.populationConfigs[1][0];
+    config_pop = &simconfig.population_configs[1][0];
     config_pop->size = populationSize_;
     double p = admixtureProportion_;
     config_pop->matingDistribution.push_back(p*p, make_pair(1,1));
@@ -141,8 +149,8 @@ void SimulationController_NeutralAdmixture::example(const string& output_directo
 
     for (size_t generation=2; generation<8; generation++)
     {
-        simconfig.populationConfigs.push_back(vector<Population::Config>(1));
-        config_pop = &simconfig.populationConfigs[generation][0];
+        simconfig.population_configs.push_back(vector<Population::Config>(1));
+        config_pop = &simconfig.population_configs[generation][0];
         config_pop->size = populationSize_;
         config_pop->matingDistribution.push_back(1, make_pair(0,0));
     }
@@ -150,11 +158,11 @@ void SimulationController_NeutralAdmixture::example(const string& output_directo
     // write out configuration files
 
     bfs::ofstream os_popconfig(outdir / "popconfig.txt");
-    os_popconfig << simconfig.populationConfigs;
+    os_popconfig << simconfig.population_configs;
     os_popconfig.close();
 
     bfs::ofstream os_genetic_map_list(outdir / "genetic_map_list.txt");
-    copy(simconfig.geneticMapFilenames.begin(), simconfig.geneticMapFilenames.end(), 
+    copy(simconfig.genetic_map_filenames.begin(), simconfig.genetic_map_filenames.end(), 
          ostream_iterator<string>(os_genetic_map_list, "\n"));
     os_genetic_map_list.close();
 

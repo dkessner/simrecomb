@@ -49,6 +49,7 @@ class SimulationController_NeutralAdmixture : public SimulationController
 
     Config config_;
     Simulator::Config simulator_config_;
+    SimulatorPtr simulator_;
 };
 
 
