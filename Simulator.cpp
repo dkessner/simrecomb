@@ -38,7 +38,7 @@ Simulator::Simulator(const Config& config)
 :   config_(config), 
     random_(config.seed),
     current_generation_(0), 
-    current_populations_(new Populations),
+    current_populations_(new PopulationPtrs),
     current_population_datas_(new PopulationDatas)
 {
     cout << "[Simulator] Initializing.\n";
@@ -79,7 +79,7 @@ void Simulator::simulate_single_generation(ostream* os_log)
          popdata!=current_population_datas_->end(); ++popdata)
         fitnesses.push_back(popdata->fitnesses);
 
-    PopulationsPtr next_populations = Population::create_populations(
+    PopulationPtrsPtr next_populations = Population::create_populations(
         config_.population_configs[current_generation_], *current_populations_, fitnesses, random_);
 
     // collect data on the populations
@@ -98,7 +98,7 @@ void Simulator::simulate_single_generation(ostream* os_log)
             loci_all.insert(*locus);
     }
 
-    Populations::const_iterator population = next_populations->begin();
+    PopulationPtrs::const_iterator population = next_populations->begin();
     for (PopulationDatas::iterator popdata=next_population_datas->begin();
          popdata!=next_population_datas->end(); ++popdata, ++population)
     {

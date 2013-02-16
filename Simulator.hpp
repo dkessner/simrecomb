@@ -62,7 +62,7 @@ class Simulator
     Genotyper genotyper_;
 
     size_t current_generation_;
-    PopulationsPtr current_populations_;
+    PopulationPtrsPtr current_populations_;
     PopulationDatasPtr current_population_datas_;
 };
 

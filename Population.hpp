@@ -64,8 +64,8 @@ std::istream& operator>>(std::istream& is, MatingDistribution& md);
 
 class Population;
 typedef shared_ptr<Population> PopulationPtr;
-typedef std::vector<PopulationPtr> Populations;
-typedef shared_ptr<Populations> PopulationsPtr;
+typedef std::vector<PopulationPtr> PopulationPtrs;
+typedef shared_ptr<PopulationPtrs> PopulationPtrsPtr;
 
 
 class Population
@@ -98,7 +98,7 @@ class Population
     typedef std::vector<Config> Configs;
 
     void create_organisms(const Config& config,
-                          const Populations& populations = Populations(),
+                          const PopulationPtrs& populations = PopulationPtrs(),
                           const DataVectorPtrs& fitnesses = DataVectorPtrs(), // null ok, but size must match populations
                           const Random& random = Random());
 
@@ -114,10 +114,10 @@ class Population
 
     // convenience function: creates new generation from previous
 
-    static PopulationsPtr create_populations(const std::vector<Population::Config>& configs,
-                                             const Populations& previous, 
-                                             const DataVectorPtrs& fitnesses,
-                                             const Random& random);
+    static PopulationPtrsPtr create_populations(const std::vector<Population::Config>& configs,
+                                                const PopulationPtrs& previous, 
+                                                const DataVectorPtrs& fitnesses,
+                                                const Random& random);
 
     private:
 

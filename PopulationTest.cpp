@@ -161,7 +161,7 @@ void testPopulation_generated()
     if (os_) *os_ << "p0:\n" << *p0 << endl;
     if (os_) *os_ << "p1:\n" << *p1 << endl;
 
-    Populations populations;
+    PopulationPtrs populations;
     populations.push_back(p0);
     populations.push_back(p1);
     
@@ -275,7 +275,7 @@ void testPopulation_fitness_constructor()
     PopulationPtr p0(new Population());
     p0->create_organisms(config0);
 
-    Populations populations;
+    PopulationPtrs populations;
     populations.push_back(p0);
 
     // fitness vector:  (1, ..., 1, 2, ..., 2)
@@ -357,7 +357,7 @@ void testPopulation_fitness_constructor_2()
 
     if (os_) *os_ << "p0:\n" << *p0 << endl;
 
-    Populations populations;
+    PopulationPtrs populations;
     populations.push_back(p0);
 
     const unsigned int seed = 123;

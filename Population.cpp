@@ -226,7 +226,7 @@ typedef shared_ptr<RandomOrganismIndexGenerator> RandomOrganismIndexGeneratorPtr
 
 
 void Population::create_organisms(const Config& config,
-                                  const Populations& populations,
+                                  const PopulationPtrs& populations,
                                   const DataVectorPtrs& fitnesses,
                                   const Random& random)
 {
@@ -266,7 +266,7 @@ void Population::create_organisms(const Config& config,
     vector<RandomOrganismIndexGeneratorPtr> random_organism_index_generators;
 
     DataVectorPtrs::const_iterator fitness = fitnesses.begin();
-    for (Populations::const_iterator population=populations.begin(); population!=populations.end(); ++population, ++fitness)
+    for (PopulationPtrs::const_iterator population=populations.begin(); population!=populations.end(); ++population, ++fitness)
         random_organism_index_generators.push_back(RandomOrganismIndexGeneratorPtr(
             new RandomOrganismIndexGenerator(**population, *fitness, random)));
 
@@ -334,12 +334,12 @@ void Population::write(ostream& os) const
 }
 
 
-PopulationsPtr Population::create_populations(const vector<Population::Config>& configs,
-                                              const Populations& previous, 
-                                              const DataVectorPtrs& fitnesses,
-                                              const Random& random)
+PopulationPtrsPtr Population::create_populations(const vector<Population::Config>& configs,
+                                                 const PopulationPtrs& previous, 
+                                                 const DataVectorPtrs& fitnesses,
+                                                 const Random& random)
 {
-    PopulationsPtr result(new Populations);
+    PopulationPtrsPtr result(new PopulationPtrs);
 
     for (vector<Population::Config>::const_iterator it=configs.begin(); it!=configs.end(); ++it)
     {

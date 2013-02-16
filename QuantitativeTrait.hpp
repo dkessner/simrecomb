@@ -140,7 +140,7 @@ class Reporter
     public:
 
     virtual void update(size_t generation_number,
-                        const Populations& populations,
+                        const PopulationPtrs& populations,
                         const PopulationDatas& population_datas) = 0;
 
     virtual ~Reporter(){}
