@@ -20,10 +20,55 @@
 #include "SimulationController_NeutralAdmixture.hpp"
 #include "boost/filesystem.hpp"
 #include <iostream>
+#include <sstream>
 
 
 using namespace std;
 namespace bfs = boost::filesystem;
+
+
+class Reporter_Log : public Reporter // simple reporter for testing
+{
+    public:
+
+    Reporter_Log(const string& output_directory)
+    :   outdir_(output_directory)
+    {
+        os_log_.open(outdir_ / "log.txt");
+        if (!os_log_)
+            throw runtime_error("[Reporter_Log] Unable to open log.");
+    }
+
+    virtual void update(size_t generation_number,
+                        const PopulationPtrs& populations,
+                        const PopulationDatas& population_datas)
+    {
+        os_log_ << generation_number << endl;
+    }
+
+
+    virtual void update_final(size_t generation_number,
+                              const PopulationPtrs& populations,
+                              const PopulationDatas& population_datas)
+    {
+        // output the last generation
+
+        for (size_t i=0; i<populations.size(); ++i)
+        {
+            ostringstream filename;
+            filename << "pop" << i << ".txt"; 
+            bfs::ofstream os_pop(outdir_ / filename.str());
+            if (!os_pop)
+                throw runtime_error(("[Reporter_Log] Unable to open " + filename.str()).c_str());
+            os_pop << *populations[i];
+        }
+    }
+
+    private:
+
+    bfs::path outdir_;
+    bfs::ofstream os_log_;
+};
 
 
 SimulationController_NeutralAdmixture::Config::Config(const Parameters& parameters)
@@ -79,11 +124,10 @@ void SimulationController_NeutralAdmixture::initialize()
 
     simulator_config_.output_directory = config_.output_directory;    
 
-    simulator_ = SimulatorPtr(new Simulator(simulator_config_));
-
-    // other initialization
-
     bfs::create_directories(config_.output_directory);
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Log(config_.output_directory)));
+
+    simulator_ = SimulatorPtr(new Simulator(simulator_config_));
 }
 
 
@@ -95,6 +139,7 @@ void SimulationController_NeutralAdmixture::run() const
 
 void SimulationController_NeutralAdmixture::report() const
 {
+    simulator_->update_final();
 }
 
 

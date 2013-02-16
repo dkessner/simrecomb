@@ -52,8 +52,9 @@ class Simulator
 
     Simulator(const Config& config);  
 
-    void simulate_single_generation(std::ostream* os_log = 0);
+    void simulate_single_generation();
     void simulate_all();
+    void update_final();
 
     private:
 

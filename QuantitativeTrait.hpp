@@ -141,7 +141,11 @@ class Reporter
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
-                        const PopulationDatas& population_datas) = 0;
+                        const PopulationDatas& population_datas) {}
+
+    virtual void update_final(size_t generation_number,
+                              const PopulationPtrs& populations,
+                              const PopulationDatas& population_datas) {}
 
     virtual ~Reporter(){}
 };

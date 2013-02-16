@@ -20,7 +20,6 @@
 #include "Simulator.hpp"
 #include <iostream>
 #include <iterator>
-#include <sstream>
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
 
@@ -60,7 +59,7 @@ Simulator::Simulator(const Config& config)
 }
 
 
-void Simulator::simulate_single_generation(ostream* os_log)
+void Simulator::simulate_single_generation()
 {
     // sanity checks
 
@@ -127,37 +126,33 @@ void Simulator::simulate_single_generation(ostream* os_log)
 
     // update
 
-    // TODO: remove once Reporters are working and we have good regression test
-    if (os_log) *os_log << current_generation_ << endl; 
-
     current_populations_ = next_populations;
     current_population_datas_ = next_population_datas;
+
+    for (ReporterPtrs::iterator reporter=config_.reporters.begin(); reporter!=config_.reporters.end(); ++reporter)
+    {
+        (*reporter)->update(current_generation_, *current_populations_, *current_population_datas_);
+    }
+
     ++current_generation_;
 }
 
 
 void Simulator::simulate_all()
 {
-    bfs::path output_directory(config_.output_directory);
-
-    bfs::ofstream os_log(output_directory / "log.txt");
-
     const size_t generation_count = config_.population_configs.size();
     for (size_t generation=0; generation<generation_count; generation++)
     {
-        simulate_single_generation(&os_log);
+        simulate_single_generation();
     }
+}
 
-    os_log.close();
 
-    // output the last generation
-    
-    for (size_t i=0; i<current_populations_->size(); ++i)
+void Simulator::update_final()
+{
+    for (ReporterPtrs::iterator reporter=config_.reporters.begin(); reporter!=config_.reporters.end(); ++reporter)
     {
-        ostringstream filename;
-        filename << "pop" << i << ".txt"; 
-        bfs::ofstream os_pop(output_directory / filename.str());
-        os_pop << *(*current_populations_)[i];
+        (*reporter)->update_final(current_generation_, *current_populations_, *current_population_datas_);
     }
 }
 
