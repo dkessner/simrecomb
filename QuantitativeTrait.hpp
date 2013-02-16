@@ -45,6 +45,7 @@ class QuantitativeTrait
 
 
 typedef shared_ptr<QuantitativeTrait> QuantitativeTraitPtr;
+typedef std::vector<QuantitativeTraitPtr> QuantitativeTraitPtrs;
 
 
 class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
@@ -77,6 +78,20 @@ class FitnessFunction
 };
 
 
+typedef shared_ptr<FitnessFunction> FitnessFunctionPtr;
+
+
+class FitnessFunction_Trivial : public FitnessFunction
+{
+    public:
+
+    virtual DataVectorPtr calculate_fitness(const TraitValueMap& trait_values) const
+    {
+        return DataVectorPtr();
+    }
+};
+
+
 class FitnessFunction_Identity : public FitnessFunction
 {
     public:
@@ -104,6 +119,25 @@ struct PopulationData
     TraitValueMapPtr trait_values;
     DataVectorPtr fitnesses;
 };
+
+
+typedef std::vector<PopulationData> PopulationDatas;
+
+
+class Reporter
+{
+    public:
+
+    virtual void update(size_t generation_number,
+                        const Populations& populations,
+                        const PopulationDatas& population_datas) = 0;
+
+    virtual ~Reporter(){}
+};
+
+
+typedef shared_ptr<Reporter> ReporterPtr;
+typedef std::vector<ReporterPtr> ReporterPtrs;
 
 
 #endif //  _QUANTITATIVETRAIT_HPP_

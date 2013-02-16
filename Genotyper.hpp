@@ -25,6 +25,7 @@
 #include "shared_ptr.hpp"
 #include <vector>
 #include <map>
+#include <set>
 
 
 struct Locus
@@ -38,7 +39,7 @@ struct Locus
 };
 
 
-typedef std::vector<Locus> Loci;
+typedef std::set<Locus> Loci;
 
 
 inline bool operator<(const Locus& a, const Locus& b)

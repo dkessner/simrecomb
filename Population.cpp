@@ -243,7 +243,7 @@ void Population::create_organisms(const Config& config,
 
     // create organisms from nothing
 
-    if (config.chromosomePairCount != 0)
+    if (config.chromosomePairCount != 0) // TODO: check populations.empty() instead, assert(chromosomePairCount>0)
     {
         for (size_t i=0; i<config.size; ++i)
         {

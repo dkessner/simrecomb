@@ -40,6 +40,14 @@ Simulator::Simulator(const Config& config)
 {
     cout << "[Simulator] Initializing.\n";
 
+    // use trivial implementations by default
+
+    if (!config_.snp_indicator.get())
+        config_.snp_indicator = SNPIndicatorPtr(new SNPIndicator_Trivial);
+
+    if (!config_.fitness_function.get())
+        config_.fitness_function = FitnessFunctionPtr(new FitnessFunction_Trivial);
+
     // initialize recombination maps
 
     cout << "[Simulator] Initializing recombination maps.\n";

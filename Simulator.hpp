@@ -21,7 +21,6 @@
 #define _SIMULATOR_HPP_
 
 
-#include "Population.hpp"
 #include "QuantitativeTrait.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/fstream.hpp"
@@ -37,10 +36,16 @@ class Simulator
     struct Config
     {
         unsigned int seed;                                      // for Random
-        std::vector<std::string> genetic_map_filenames;         // one filename for each chromosome pair
-        std::vector<Population::Configs> population_configs;    // Population::Configs for each generation
         std::string output_directory;                           // all output files placed here
         std::ostream* os_progress;                              // progress update stream (default: stdout)
+
+        std::vector<std::string> genetic_map_filenames;         // one filename for each chromosome pair
+        std::vector<Population::Configs> population_configs;    // Population::Configs for each generation
+
+        SNPIndicatorPtr snp_indicator;
+        QuantitativeTraitPtrs quantitative_traits;
+        FitnessFunctionPtr fitness_function;
+        ReporterPtrs reporters;
 
         Config() : seed(0), os_progress(&std::cout) {}
     };

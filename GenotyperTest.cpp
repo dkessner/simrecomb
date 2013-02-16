@@ -139,7 +139,7 @@ void test_genotype_harder()
     organisms.push_back(hetero);
 
     Loci loci;
-    loci.push_back(locus);
+    loci.insert(locus);
     
     Population population(organisms);
 

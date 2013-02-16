@@ -99,7 +99,7 @@ class Population
 
     void create_organisms(const Config& config,
                           const Populations& populations = Populations(),
-                          const DataVectorPtrs& fitnesses = DataVectorPtrs(),
+                          const DataVectorPtrs& fitnesses = DataVectorPtrs(), // null ok, but size must match populations
                           const Random& random = Random());
 
     const std::vector<Organism>& organisms() const {return organisms_;}
