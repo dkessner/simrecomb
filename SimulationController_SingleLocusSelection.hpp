@@ -1,5 +1,5 @@
 //
-// SimulationController_NeutralAdmixture.hpp
+// SimulationController_SingleLocusSelection.hpp
 //
 // Copyright 2013 Darren Kessner
 //
@@ -17,28 +17,30 @@
 //
 
 
-#ifndef _SIMULATIONCONTROLLER_NEUTRALADMIXTURE_HPP_
-#define _SIMULATIONCONTROLLER_NEUTRALADMIXTURE_HPP_
+#ifndef _SIMULATIONCONTROLLER_SINGLELOCUSSELECTION_HPP_
+#define _SIMULATIONCONTROLLER_SINGLELOCUSSELECTION_HPP_
 
 
 #include "SimulationController.hpp"
 
 
-class SimulationController_NeutralAdmixture : public SimulationController
+class SimulationController_SingleLocusSelection : public SimulationController
 {
     public:
 
     struct Config
     {
         int seed;
-        std::string population_config_filename; // "popconfig"
-        std::string genetic_map_list_filename;  // "genetic_map_list"
         std::string output_directory;           // "outdir"
+        size_t population_size;                 // "popsize"
+        size_t generation_count;                // "gencount"
+        size_t initial_allele_frequency;        // "allelefreq"
+
 
         Config(const Parameters& parameters = Parameters()); // allows auto conversion: Parameters->Config
     };
 
-    SimulationController_NeutralAdmixture(const Config& config = Config());
+    SimulationController_SingleLocusSelection(const Config& config = Config());
 
     virtual void usage() const;
     virtual void initialize();
@@ -54,5 +56,5 @@ class SimulationController_NeutralAdmixture : public SimulationController
 };
 
 
-#endif //  _SIMULATIONCONTROLLER_NEUTRALADMIXTURE_HPP_
+#endif //  _SIMULATIONCONTROLLER_SINGLELOCUSSELECTION_HPP_
 

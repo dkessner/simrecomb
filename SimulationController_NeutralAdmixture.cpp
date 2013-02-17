@@ -85,6 +85,24 @@ SimulationController_NeutralAdmixture::SimulationController_NeutralAdmixture(con
 {}
 
 
+void SimulationController_NeutralAdmixture::usage() const
+{
+    cout << "Usage:  simrecomb neutral_admixture [parameter_name=value] ...\n";
+    cout << "        simrecomb na [parameter_name=value] ...\n";
+    cout << "        simrecomb na config=config_filename ...\n";
+    cout << endl;
+    cout << "Required parameters:\n";
+    cout << "  popconfig=<population_config_filename>\n";
+    cout << "  genetic_map_list=<genetic_map_list_filename>\n";
+    cout << "  outdir=<output_directory>\n";
+    cout << endl;
+    cout << "Optional parameters:\n";
+    cout << "  config=<config_filename>\n";
+    cout << "  seed=<value>\n";
+    cout << endl;
+}
+
+
 void SimulationController_NeutralAdmixture::initialize()
 {
     // check parameters

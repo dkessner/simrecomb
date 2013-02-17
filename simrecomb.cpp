@@ -91,6 +91,9 @@ void parse_command_line(int argc, char* argv[], string& simname, SimulationContr
     usage << "Available simnames (abbreviation):\n";
     usage << "    neutral_admixture (na)\n";
     usage << endl;
+    usage << "Usage for <simname>:\n";
+    usage << "    simrecomb <simname>\n";
+    usage << endl;
     usage << "Create and run example for <simname>:\n";
     usage << "    simrecomb <simname> example outdir=<dirname>   # creates config files\n";
     usage << "    cd <dirname>\n";
@@ -99,7 +102,7 @@ void parse_command_line(int argc, char* argv[], string& simname, SimulationContr
     usage << "Darren Kessner\n";
     usage << "John Novembre Lab, UCLA\n";
 
-    if (argc < 3)
+    if (argc < 2)
         throw runtime_error(usage.str().c_str());
 
     simname = argv[1];
@@ -133,9 +136,14 @@ int main(int argc, char* argv[])
         if (!controller.get())
             throw runtime_error("[simrecomb] Null SimulationControllerPtr");
 
-        // special handling for "example"
+        // special handling for "usage" and "example"
 
-        if (parameters.count("example"))
+        if (parameters.size() == 0)
+        {
+            controller->usage();
+            return 0;
+        }
+        else if (parameters.count("example"))
         {
             if (!parameters.count("outdir"))
                 throw runtime_error("[simrecomb] Parameter 'outdir' must be specified for 'example'");
