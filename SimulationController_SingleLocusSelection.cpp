@@ -19,13 +19,19 @@
 
 #include "SimulationController_SingleLocusSelection.hpp"
 #include "boost/filesystem.hpp"
+#include "boost/lambda/lambda.hpp"
 #include <iostream>
 #include <sstream>
 
 
 using namespace std;
 namespace bfs = boost::filesystem;
+using namespace boost::lambda;
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// TODO:  move this stuff
 
 class Reporter_Temp : public Reporter // simple reporter for testing
 {
@@ -56,12 +62,10 @@ class Reporter_Temp : public Reporter // simple reporter for testing
         os_pop << *populations.front();
     }
 
-
     virtual void update_final(size_t generation_number,
                               const PopulationPtrs& populations,
                               const PopulationDatas& population_datas)
-    {
-    }
+    {}
 
     private:
 
@@ -70,9 +74,45 @@ class Reporter_Temp : public Reporter // simple reporter for testing
 };
 
 
+class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
+{
+    public:
+
+    QuantitativeTrait_SingleLocusFitness(int id, Locus locus, vector<double> w)
+    :   QuantitativeTrait(id), locus_(locus), w_(w)
+    {
+        loci_.insert(locus); // to satisfy interface loci() -- TODO: revisit
+    }
+
+    virtual DataVectorPtr calculate_trait_values(GenotypeMapPtr genotypes) const
+    {
+        if (genotypes->size() != 1 || genotypes->count(locus_) != 1)
+            throw runtime_error("[QuantitativeTrait_SingleLocusFitness] Invalid genotype map.\n");
+
+        const GenotypeDataPtr& g = genotypes->at(locus_);
+
+        DataVectorPtr fitnesses(new DataVector(g->size()));
+
+        // transform {0, 1, 2} -> {w[0], w[1], w[2]}
+        DataVector::iterator jt = fitnesses->begin();
+        for (GenotypeData::const_iterator it=g->begin(); it!=g->end(); ++it, ++jt)
+            *jt = w_[*it];
+
+        return fitnesses;
+    }
+
+    private:
+
+    Locus locus_;
+    vector<double> w_; // relative fitnesses
+};
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 SimulationController_SingleLocusSelection::Config::Config(const Parameters& parameters)
+:   w(3, 1)
 {
     seed = parameters.count("seed") ? atoi(parameters.at("seed").c_str()) : 0;
     output_directory = parameters.count("outdir") ? parameters.at("outdir") : "";
@@ -81,9 +121,9 @@ SimulationController_SingleLocusSelection::Config::Config(const Parameters& para
     generation_count = parameters.count("gencount") ? atoi(parameters.at("gencount").c_str()) : 0;
     initial_allele_frequency = parameters.count("allelefreq") ? atoi(parameters.at("allelefreq").c_str()) : 0;
 
-    w0 = parameters.count("w0") ? atof(parameters.at("w0").c_str()) : 1;
-    w1 = parameters.count("w1") ? atof(parameters.at("w1").c_str()) : 1;
-    w2 = parameters.count("w2") ? atof(parameters.at("w2").c_str()) : 1;
+    w[0] = parameters.count("w0") ? atof(parameters.at("w0").c_str()) : 1;
+    w[1] = parameters.count("w1") ? atof(parameters.at("w1").c_str()) : 1;
+    w[2] = parameters.count("w2") ? atof(parameters.at("w2").c_str()) : 1;
 }
 
 
@@ -160,9 +200,17 @@ void SimulationController_SingleLocusSelection::initialize()
 
     cout << "ok\n";
 
+    Locus locus(0, 100000); // hardcoded locus
+    int qtid = 0; // hardcoded QT id
+
+    QuantitativeTraitPtr qt(new QuantitativeTrait_SingleLocusFitness(qtid, locus, config_.w));
+    simulator_config_.quantitative_traits.push_back(qt);
+
+    FitnessFunctionPtr ff(new FitnessFunction_Identity(qtid));
+    simulator_config_.fitness_function = ff;
+
     // SNPIndicator & popconfigs
 
-    // QT_SingleLocusFitness
     // FF_Identity
 
     // Reporters:  

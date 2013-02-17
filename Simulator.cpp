@@ -109,6 +109,8 @@ void Simulator::simulate_single_generation()
     for (PopulationDatas::iterator popdata=next_population_datas->begin();
          popdata!=next_population_datas->end(); ++popdata)
     {
+        popdata->trait_values = TraitValueMapPtr(new TraitValueMap);
+
         for (QuantitativeTraitPtrs::const_iterator qt=config_.quantitative_traits.begin();
              qt!=config_.quantitative_traits.end(); ++qt)
         {
@@ -121,8 +123,7 @@ void Simulator::simulate_single_generation()
     for (PopulationDatas::iterator popdata=next_population_datas->begin();
          popdata!=next_population_datas->end(); ++popdata)
     {
-         if (popdata->trait_values.get())
-             popdata->fitnesses = config_.fitness_function->calculate_fitness(*popdata->trait_values);
+         popdata->fitnesses = config_.fitness_function->calculate_fitness(*popdata->trait_values);
     }
 
     // update

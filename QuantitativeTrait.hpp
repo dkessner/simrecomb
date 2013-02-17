@@ -57,24 +57,6 @@ typedef shared_ptr<QuantitativeTrait> QuantitativeTraitPtr;
 typedef std::vector<QuantitativeTraitPtr> QuantitativeTraitPtrs;
 
 
-class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
-{
-    public:
-
-    QuantitativeTrait_SingleLocusFitness(int id)
-    :   QuantitativeTrait(id)
-    {}
-
-    // transform {0, 1, 2} -> {1, 1+hs, 1+2s}
-    virtual DataVectorPtr calculate_trait_values(GenotypeMapPtr genotype_map) const;
-
-    private:
-
-    double s_; // selection coefficient
-    double h_; // dominance
-};
-
-
 typedef std::map<int, DataVectorPtr> TraitValueMap;  // map QT id -> trait_values
 typedef shared_ptr<TraitValueMap> TraitValueMapPtr;
 

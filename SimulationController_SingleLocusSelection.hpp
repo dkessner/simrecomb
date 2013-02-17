@@ -38,9 +38,7 @@ class SimulationController_SingleLocusSelection : public SimulationController
         size_t initial_allele_frequency;        // "allelefreq"
         
         // relative fitnesses for genotype g in {0,1,2}, where g is the # of selected alleles
-        double w0;
-        double w1;
-        double w2;
+        std::vector<double> w;                       // "w0", "w1", "w2"
 
         Config(const Parameters& parameters = Parameters()); // allows auto conversion: Parameters->Config
     };
