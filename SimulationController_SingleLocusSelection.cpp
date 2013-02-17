@@ -133,7 +133,7 @@ class Reporter_Fitnesses : public Reporter
             throw runtime_error("[Reporter_Fitnesses] Expecting single population.");
 
         const DataVector& fitnesses = *population_datas[0].fitnesses;
-        copy(fitnesses.begin(), fitnesses.end(), ostream_iterator<int>(os, "\n"));
+        copy(fitnesses.begin(), fitnesses.end(), ostream_iterator<double>(os, "\n"));
     }
 
     virtual void update_final(size_t generation_number,
@@ -294,6 +294,9 @@ void SimulationController_SingleLocusSelection::initialize()
     
     cout << "seed: " << config_.seed << endl; // TODO: remove
     cout << "initial_allele_frequency: " << config_.initial_allele_frequency << endl; // TODO: remove
+    cout << "w: ";
+    copy(config_.w.begin(), config_.w.end(), ostream_iterator<double>(cout, " "));
+    cout << endl;
 
     simulator_config_.output_directory = config_.output_directory;    
 
