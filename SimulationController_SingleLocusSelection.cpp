@@ -55,7 +55,7 @@ class Reporter_Temp : public Reporter // simple reporter for testing
         os_log_ << "population 0 size: " << populations.front()->size() << endl;
 
         ostringstream filename;
-        filename << "gen" << generation_number << ".txt"; 
+        filename << "pop0_" << generation_number << ".txt"; 
         bfs::ofstream os_pop(outdir_ / filename.str());
         if (!os_pop)
             throw runtime_error(("[Reporter_Temp] Unable to open " + filename.str()).c_str());
@@ -90,7 +90,7 @@ class Reporter_Genotypes : public Reporter
         filename << "genotypes_" << generation_number << ".txt"; 
         bfs::ofstream os(outdir_ / filename.str());
         if (!os)
-            throw runtime_error(("[Reporter_Temp] Unable to open " + filename.str()).c_str());
+            throw runtime_error(("[Reporter_Genotypes] Unable to open " + filename.str()).c_str());
 
         if (population_datas.size() != 1)
             throw runtime_error("[Reporter_Genotypes] Expecting single population.");
@@ -108,6 +108,42 @@ class Reporter_Genotypes : public Reporter
 
     bfs::path outdir_;
     Locus locus_;
+};
+
+
+class Reporter_Fitnesses : public Reporter
+{
+    public:
+
+    Reporter_Fitnesses(const string& output_directory)
+    :   outdir_(output_directory)
+    {}
+
+    virtual void update(size_t generation_number,
+                        const PopulationPtrs& populations,
+                        const PopulationDatas& population_datas)
+    {
+        ostringstream filename;
+        filename << "fitnesses_" << generation_number << ".txt"; 
+        bfs::ofstream os(outdir_ / filename.str());
+        if (!os)
+            throw runtime_error(("[Reporter_Fitnesses] Unable to open " + filename.str()).c_str());
+
+        if (population_datas.size() != 1)
+            throw runtime_error("[Reporter_Fitnesses] Expecting single population.");
+
+        const DataVector& fitnesses = *population_datas[0].fitnesses;
+        copy(fitnesses.begin(), fitnesses.end(), ostream_iterator<int>(os, "\n"));
+    }
+
+    virtual void update_final(size_t generation_number,
+                              const PopulationPtrs& populations,
+                              const PopulationDatas& population_datas)
+    {}
+
+    private:
+
+    bfs::path outdir_;
 };
 
 
@@ -290,6 +326,7 @@ void SimulationController_SingleLocusSelection::initialize()
     
     simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Temp(config_.output_directory)));
     simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Genotypes(config_.output_directory, locus)));
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Fitnesses(config_.output_directory)));
 
     // Reporters:  
     //   full population for debugging 
