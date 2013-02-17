@@ -18,6 +18,7 @@
 
 
 #include "SimulationController_NeutralAdmixture.hpp"
+#include "SimulationController_SingleLocusSelection.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -90,6 +91,7 @@ void parse_command_line(int argc, char* argv[], string& simname, SimulationContr
     usage << endl;
     usage << "Available simnames (abbreviation):\n";
     usage << "    neutral_admixture (na)\n";
+    usage << "    single_locus_selection (sls)\n";
     usage << endl;
     usage << "Usage for <simname>:\n";
     usage << "    simrecomb <simname>\n";
@@ -127,6 +129,10 @@ int main(int argc, char* argv[])
         if (simname == "neutral_admixture" || simname == "na")
         {
             controller = SimulationControllerPtr(new SimulationController_NeutralAdmixture(parameters));
+        }
+        else if (simname == "single_locus_selection" || simname == "sls")
+        {
+            controller = SimulationControllerPtr(new SimulationController_SingleLocusSelection(parameters));
         }
         else
         {

@@ -92,9 +92,9 @@ void SimulationController_NeutralAdmixture::usage() const
     cout << "        simrecomb na config=config_filename ...\n";
     cout << endl;
     cout << "Required parameters:\n";
+    cout << "  outdir=<output_directory>\n";
     cout << "  popconfig=<population_config_filename>\n";
     cout << "  genetic_map_list=<genetic_map_list_filename>\n";
-    cout << "  outdir=<output_directory>\n";
     cout << endl;
     cout << "Optional parameters:\n";
     cout << "  config=<config_filename>\n";
