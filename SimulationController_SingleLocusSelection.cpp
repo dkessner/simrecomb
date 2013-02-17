@@ -20,10 +20,56 @@
 #include "SimulationController_SingleLocusSelection.hpp"
 #include "boost/filesystem.hpp"
 #include <iostream>
+#include <sstream>
 
 
 using namespace std;
 namespace bfs = boost::filesystem;
+
+
+class Reporter_Temp : public Reporter // simple reporter for testing
+{
+    public:
+
+    Reporter_Temp(const string& output_directory)
+    :   outdir_(output_directory)
+    {
+        os_log_.open(outdir_ / "log.txt");
+        if (!os_log_)
+            throw runtime_error("[Reporter_Temp] Unable to open log.");
+    }
+
+    virtual void update(size_t generation_number,
+                        const PopulationPtrs& populations,
+                        const PopulationDatas& population_datas)
+    {
+        os_log_ << "generation: " << generation_number << endl;
+        os_log_ << "populations: " << populations.size() << endl;
+        assert(populations.size() == 1);
+        os_log_ << "population 0 size: " << populations.front()->size() << endl;
+
+        ostringstream filename;
+        filename << "gen" << generation_number << ".txt"; 
+        bfs::ofstream os_pop(outdir_ / filename.str());
+        if (!os_pop)
+            throw runtime_error(("[Reporter_Temp] Unable to open " + filename.str()).c_str());
+        os_pop << *populations.front();
+    }
+
+
+    virtual void update_final(size_t generation_number,
+                              const PopulationPtrs& populations,
+                              const PopulationDatas& population_datas)
+    {
+    }
+
+    private:
+
+    bfs::path outdir_;
+    bfs::ofstream os_log_;
+};
+
+
 
 
 SimulationController_SingleLocusSelection::Config::Config(const Parameters& parameters)
@@ -68,6 +114,9 @@ void SimulationController_SingleLocusSelection::SimulationController_SingleLocus
 }
 
 
+Random random_hack_; // TODO: remove
+
+
 void SimulationController_SingleLocusSelection::initialize()
 {
     // check parameters
@@ -94,16 +143,35 @@ void SimulationController_SingleLocusSelection::initialize()
 
     simulator_config_.output_directory = config_.output_directory;    
 
+    Population::Configs configs_gen_0(1);
+    Population::Config& config_gen_0 = configs_gen_0.back();
+    config_gen_0.size = config_.population_size;
+    config_gen_0.populationID = 0; 
+    config_gen_0.chromosomePairCount = 1; 
+    simulator_config_.population_configs.push_back(configs_gen_0);
+
+    Population::Configs configs_gen_next(1);
+    Population::Config& config_gen_next = configs_gen_next.back();
+    config_gen_next.size = config_.population_size;
+    config_gen_next.populationID = 0; 
+    config_gen_next.matingDistribution.push_back(1, make_pair(0,0));
+    for (size_t i=0; i<config_.generation_count; ++i)
+        simulator_config_.population_configs.push_back(configs_gen_next);
+
+    cout << "ok\n";
+
     // SNPIndicator & popconfigs
 
     // QT_SingleLocusFitness
     // FF_Identity
 
-    // Reporters:  allele freq / homozygosity
-    //             block lengths?
-    //             mean fitness
+    // Reporters:  
+    //   full population for debugging 
+    //   allele freq / homozygosity
+    //   block lengths?
+    //   mean fitness
 
-    //simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Log(config_.output_directory)));
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Temp(config_.output_directory)));
 
     simulator_ = SimulatorPtr(new Simulator(simulator_config_));
 }
@@ -111,6 +179,11 @@ void SimulationController_SingleLocusSelection::initialize()
 
 void SimulationController_SingleLocusSelection::run() const
 {
+    // hack: TODO remove -- fix Simulator logic for this
+
+    Organism::recombinationPositionGenerator_ =
+        shared_ptr<RecombinationPositionGenerator>(new RecombinationPositionGenerator_Trivial(random_hack_));
+
     simulator_->simulate_all();
 }
 

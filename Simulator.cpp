@@ -121,7 +121,8 @@ void Simulator::simulate_single_generation()
     for (PopulationDatas::iterator popdata=next_population_datas->begin();
          popdata!=next_population_datas->end(); ++popdata)
     {
-         popdata->fitnesses = config_.fitness_function->calculate_fitness(*popdata->trait_values);
+         if (popdata->trait_values.get())
+             popdata->fitnesses = config_.fitness_function->calculate_fitness(*popdata->trait_values);
     }
 
     // update
