@@ -18,6 +18,33 @@
 
 
 #include "Genotyper.hpp"
+#include <iostream>
+
+
+bool operator<(const Locus& a, const Locus& b)
+{
+    return (a.chromosome_pair_index < b.chromosome_pair_index) ||
+           (a.chromosome_pair_index == b.chromosome_pair_index && a.position < b.position);
+}
+
+
+bool operator==(const Locus& a, const Locus& b)
+{
+    return (a.chromosome_pair_index == b.chromosome_pair_index && a.position == b.position);
+}
+
+
+bool operator!=(const Locus& a, const Locus& b)
+{
+    return !(a==b);
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Locus& locus)
+{
+    os << "(" << locus.chromosome_pair_index << "," << locus.position << ")";
+    return os;
+}
 
 
 unsigned int Genotyper::genotype(const Locus& locus, 

@@ -35,7 +35,7 @@ class SimulationController_SingleLocusSelection : public SimulationController
 
         size_t population_size;                 // "popsize"
         size_t generation_count;                // "gencount"
-        size_t initial_allele_frequency;        // "allelefreq"
+        double initial_allele_frequency;        // "allelefreq"
         
         // relative fitnesses for genotype g in {0,1,2}, where g is the # of selected alleles
         std::vector<double> w;                       // "w0", "w1", "w2"

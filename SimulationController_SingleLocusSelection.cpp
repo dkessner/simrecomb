@@ -74,6 +74,80 @@ class Reporter_Temp : public Reporter // simple reporter for testing
 };
 
 
+class Reporter_Genotypes : public Reporter
+{
+    public:
+
+    Reporter_Genotypes(const string& output_directory, Locus locus)
+    :   outdir_(output_directory), locus_(locus)
+    {}
+
+    virtual void update(size_t generation_number,
+                        const PopulationPtrs& populations,
+                        const PopulationDatas& population_datas)
+    {
+        ostringstream filename;
+        filename << "genotypes_" << generation_number << ".txt"; 
+        bfs::ofstream os(outdir_ / filename.str());
+        if (!os)
+            throw runtime_error(("[Reporter_Temp] Unable to open " + filename.str()).c_str());
+
+        if (population_datas.size() != 1)
+            throw runtime_error("[Reporter_Genotypes] Expecting single population.");
+    
+        GenotypeDataPtr genotypes = population_datas[0].genotypes->at(locus_);
+        copy(genotypes->begin(), genotypes->end(), ostream_iterator<int>(os, "\n"));
+    }
+
+    virtual void update_final(size_t generation_number,
+                              const PopulationPtrs& populations,
+                              const PopulationDatas& population_datas)
+    {}
+
+    private:
+
+    bfs::path outdir_;
+    Locus locus_;
+};
+
+
+class SNPIndicator_SingleLocusHardyWeinberg : public SNPIndicator
+{
+    public:
+
+    SNPIndicator_SingleLocusHardyWeinberg(Locus locus, size_t population_size, double allele_frequency)
+    :   locus_(locus)
+    {
+        const double p = allele_frequency;
+        const double q = 1-p;
+        const size_t N = population_size;
+
+        // genotypes:  (2, ... , 2, 1, ... , 1, 0, ... , 0)
+        //                N*p^2       N(2pq)       N*q^2
+        max_2_ = N * p * p;
+        max_1_ = N * (1 - q*q);
+
+        cout << "max_2: " << max_2_ << endl;
+        cout << "max_1: " << max_1_ << endl;
+    }
+
+    virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const
+    {
+        if (locus != locus_) return 0;
+        Chromosome::ID id(chromosome_id);
+        if (id.individual < max_2_) return 1;
+        else if (id.individual < max_1_ && id.which == 0) return 1;
+        return 0; 
+    }
+
+    private:
+
+    Locus locus_;
+    size_t max_2_;
+    size_t max_1_;
+};
+
+
 class QuantitativeTrait_SingleLocusFitness : public QuantitativeTrait
 {
     public:
@@ -119,7 +193,10 @@ SimulationController_SingleLocusSelection::Config::Config(const Parameters& para
 
     population_size = parameters.count("popsize") ? atoi(parameters.at("popsize").c_str()) : 0;
     generation_count = parameters.count("gencount") ? atoi(parameters.at("gencount").c_str()) : 0;
-    initial_allele_frequency = parameters.count("allelefreq") ? atoi(parameters.at("allelefreq").c_str()) : 0;
+    initial_allele_frequency = parameters.count("allelefreq") ? atof(parameters.at("allelefreq").c_str()) : 0; // atof
+
+    cout << "allelefreq string: " << parameters.at("allelefreq") << endl;
+    cout << "allelefreq: " << atof(parameters.at("allelefreq").c_str()) << endl;
 
     w[0] = parameters.count("w0") ? atof(parameters.at("w0").c_str()) : 1;
     w[1] = parameters.count("w1") ? atof(parameters.at("w1").c_str()) : 1;
@@ -180,6 +257,7 @@ void SimulationController_SingleLocusSelection::initialize()
     simulator_config_.seed = config_.seed;
     
     cout << "seed: " << config_.seed << endl; // TODO: remove
+    cout << "initial_allele_frequency: " << config_.initial_allele_frequency << endl; // TODO: remove
 
     simulator_config_.output_directory = config_.output_directory;    
 
@@ -198,8 +276,6 @@ void SimulationController_SingleLocusSelection::initialize()
     for (size_t i=0; i<config_.generation_count; ++i)
         simulator_config_.population_configs.push_back(configs_gen_next);
 
-    cout << "ok\n";
-
     Locus locus(0, 100000); // hardcoded locus
     int qtid = 0; // hardcoded QT id
 
@@ -209,17 +285,17 @@ void SimulationController_SingleLocusSelection::initialize()
     FitnessFunctionPtr ff(new FitnessFunction_Identity(qtid));
     simulator_config_.fitness_function = ff;
 
-    // SNPIndicator & popconfigs
-
-    // FF_Identity
+    simulator_config_.snp_indicator = SNPIndicatorPtr(new SNPIndicator_SingleLocusHardyWeinberg(
+        locus, config_.population_size, config_.initial_allele_frequency));
+    
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Temp(config_.output_directory)));
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Genotypes(config_.output_directory, locus)));
 
     // Reporters:  
     //   full population for debugging 
     //   allele freq / homozygosity
     //   block lengths?
     //   mean fitness
-
-    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Temp(config_.output_directory)));
 
     simulator_ = SimulatorPtr(new Simulator(simulator_config_));
 }

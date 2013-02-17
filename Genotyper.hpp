@@ -42,11 +42,10 @@ struct Locus
 typedef std::set<Locus> Loci;
 
 
-inline bool operator<(const Locus& a, const Locus& b)
-{
-    return (a.chromosome_pair_index < b.chromosome_pair_index) ||
-           (a.chromosome_pair_index == b.chromosome_pair_index && a.position < b.position);
-}
+bool operator<(const Locus& a, const Locus& b);
+bool operator==(const Locus& a, const Locus& b);
+bool operator!=(const Locus& a, const Locus& b);
+std::ostream& operator<<(std::ostream& os, const Locus& locus);
 
 
 class GenotypeData : public std::vector<char> // {0,1,2} for each individual
