@@ -350,6 +350,36 @@ void SimulationController_SingleLocusSelection::SimulationController_SingleLocus
 Random random_hack_; // TODO: remove
 
 
+namespace {
+
+void write_deterministic_trajectories(const SimulationController_SingleLocusSelection::Config& config)
+{
+    bfs::path outdir(config.output_directory);
+    bfs::ofstream os_p(outdir / "allele_freqs_deterministic.txt");
+    bfs::ofstream os_w(outdir / "mean_fitnesses_deterministic.txt");
+
+    double p = config.initial_allele_frequency;
+    const double w0 = config.w[0], w1 = config.w[1], w2 = config.w[2];
+    
+    for (size_t generation=0; generation<config.generation_count; ++generation)
+    {
+        double q = 1 - p;
+        double w0_marginal = q*w0 + p*w1;
+        double w1_marginal = q*w1 + p*w2;
+        double w_mean = q*w0_marginal + p*w1_marginal;
+        double dp = p*q*(w1_marginal-w0_marginal)/w_mean;
+        //double dw = dp*(w1_marginal-w0_marginal) + dp*dp*(w2-2*w1+w0);
+
+        os_p << p << endl;
+        os_w << w_mean << endl;
+
+        p = p + dp;
+    }
+}
+
+} // namespace
+
+
 void SimulationController_SingleLocusSelection::initialize()
 {
     // check parameters
@@ -367,6 +397,7 @@ void SimulationController_SingleLocusSelection::initialize()
         throw runtime_error("[SimulationController_SingleLocusSelection] Generation count not specified (gencount=value).");
 
     bfs::create_directories(config_.output_directory);
+
     bfs::ofstream os_config(bfs::path(config_.output_directory) / "config.txt");
     os_config << config_ << endl;
     os_config.close();
@@ -398,7 +429,7 @@ void SimulationController_SingleLocusSelection::initialize()
         config_gen_next.populationID = i; 
         config_gen_next.matingDistribution.push_back(1, make_pair(i,i));
     }
-    for (size_t i=0; i<config_.generation_count; ++i)
+    for (size_t i=0; i<config_.generation_count-1; ++i)
         simulator_config_.population_configs.push_back(configs_gen_next); // copy
 
     bfs::ofstream os(bfs::path(config_.output_directory) / "popconfig.txt");
@@ -426,6 +457,8 @@ void SimulationController_SingleLocusSelection::initialize()
     simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Fitnesses(config_.output_directory, config_.verbose)));
 
     simulator_ = SimulatorPtr(new Simulator(simulator_config_));
+
+    write_deterministic_trajectories(config_);
 }
 
 
