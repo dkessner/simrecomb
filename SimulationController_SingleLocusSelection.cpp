@@ -87,18 +87,34 @@ class Reporter_Genotypes : public Reporter
 
     Reporter_Genotypes(const string& output_directory, Locus locus, bool verbose)
     :   outdir_(output_directory), locus_(locus), verbose_(verbose)
-    {}
+    {
+        os_allele_freqs_.open(outdir_ / "allele_freqs.txt");
+        if (!os_allele_freqs_)
+            throw runtime_error("[Reporter_Genotypes] Unable to open file allele_freqs.txt");
+    }
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
-        if (!verbose_) return;
-
         if (populations.size() != population_datas.size())
             throw runtime_error("[Reporter_Genotypes] Population data size mismatch.");
 
         const size_t population_count = populations.size();
+
+        // update allele frequenices
+
+        for (size_t population_index=0; population_index<population_count; ++population_index)
+        {
+            GenotypeDataPtr genotypes = population_datas[population_index].genotypes->at(locus_);
+            os_allele_freqs_ << genotypes->allele_frequency() << " ";
+        }
+        os_allele_freqs_ << endl;
+
+        // if verbose, write full genotype data
+
+        if (!verbose_) return;
+
         const char* filestem = "genotypes";
 
         for (size_t population_index=0; population_index<population_count; ++population_index)
@@ -124,6 +140,7 @@ class Reporter_Genotypes : public Reporter
     private:
 
     bfs::path outdir_;
+    bfs::ofstream os_allele_freqs_;
     Locus locus_;
     bool verbose_;
 };
@@ -135,18 +152,34 @@ class Reporter_Fitnesses : public Reporter
 
     Reporter_Fitnesses(const string& output_directory, bool verbose)
     :   outdir_(output_directory), verbose_(verbose)
-    {}
+    {
+        os_mean_.open(outdir_ / "mean_fitnesses.txt");
+        if (!os_mean_)
+            throw runtime_error("[Reporter_Fitnesses] Unable to open file mean_fitnesses.txt");
+    }
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
-        if (!verbose_) return;
-
         if (populations.size() != population_datas.size())
             throw runtime_error("[Reporter_Fitnesses] Population data size mismatch.");
 
         const size_t population_count = populations.size();
+
+        // update mean fitnesses
+
+        for (size_t population_index=0; population_index<population_count; ++population_index)
+        {
+            const DataVector& fitnesses = *population_datas[population_index].fitnesses;
+            os_mean_ << fitnesses.mean() << " ";
+        }
+        os_mean_ << endl;
+
+        // if verbose, report full fitnesses
+
+        if (!verbose_) return;
+
         const char* filestem = "fitnesses";
 
         for (size_t population_index=0; population_index<population_count; ++population_index)
@@ -172,6 +205,7 @@ class Reporter_Fitnesses : public Reporter
     private:
 
     bfs::path outdir_;
+    bfs::ofstream os_mean_;
     bool verbose_;
 };
 

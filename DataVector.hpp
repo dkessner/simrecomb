@@ -41,9 +41,11 @@ class DataVector : public std::vector<double>
 
     // convenience functions
 
+    double mean() const;
     DataVectorPtr cdf() const; // note: allocates a new DataVector
 
-    // TODO add functions as needed:  sum, sum_squares, mean, variance
+    // TODO add functions as needed:  sum, sum_squares, variance
+    // inner product -> sum_squares -> variance
 };
 
 

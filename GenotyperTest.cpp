@@ -161,10 +161,25 @@ void test_genotype_harder()
 }
 
 
+void test_allele_frequency()
+{
+    GenotypeData data;
+
+    // Hardy-Weinberg with p=.2, N=100
+    for (size_t i=0; i<64; i++) data.push_back(0);
+    for (size_t i=0; i<32; i++) data.push_back(1);
+    for (size_t i=0; i<4; i++) data.push_back(2);
+
+    const double epsilon = 1e-12;
+    unit_assert_equal(data.allele_frequency(), .2, epsilon);
+}
+
+
 void test()
 {
     test_genotype_easy();
     test_genotype_harder();
+    test_allele_frequency();
 }
 
 

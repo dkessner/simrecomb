@@ -19,6 +19,12 @@
 
 #include "Genotyper.hpp"
 #include <iostream>
+#include <numeric>
+
+
+//
+// Locus
+//
 
 
 bool operator<(const Locus& a, const Locus& b)
@@ -45,6 +51,23 @@ std::ostream& operator<<(std::ostream& os, const Locus& locus)
     os << "(" << locus.chromosome_pair_index << "," << locus.position << ")";
     return os;
 }
+
+
+//
+// GenotypeData
+//
+
+
+double GenotypeData::allele_frequency() const
+{
+    double sum = accumulate(begin(), end(), 0.0);
+    return sum/size()/2;
+}
+
+
+//
+// Genotyper
+//
 
 
 unsigned int Genotyper::genotype(const Locus& locus, 

@@ -25,6 +25,12 @@
 using namespace std;
 
 
+double DataVector::mean() const
+{
+    return accumulate(begin(), end(), 0.0)/size();
+}
+
+
 DataVectorPtr DataVector::cdf() const
 {
     DataVectorPtr result(new DataVector(this->size()));

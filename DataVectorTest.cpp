@@ -47,9 +47,20 @@ void test_cdf()
 }
 
 
+void test_mean()
+{
+    DataVector d;
+    for (int i=1; i<=9; ++i)
+        d.push_back(i);
+
+    unit_assert(d.mean() == 5.0);
+}
+
+
 void test()
 {
     test_cdf();
+    test_mean();
 }
 
 
