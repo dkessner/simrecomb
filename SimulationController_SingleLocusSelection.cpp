@@ -221,13 +221,12 @@ class SNPIndicator_SingleLocusHardyWeinberg : public SNPIndicator
         const double q = 1-p;
         const size_t N = population_size;
 
-        // genotypes:  (2, ... , 2, 1, ... , 1, 0, ... , 0)
-        //                N*p^2       N(2pq)       N*q^2
+        // individuals: (0, 1, 2, ... ,     max_2, ... ,     max_1, ...    )
+        // genotypes:   (2, 2, 2, ... , 2,  1, 1,  ... , 1,  0, 0,  ... , 0)
+        //                       N*p^2            N(2pq)          N*q^2
+
         max_2_ = N * p * p;
         max_1_ = N * (1 - q*q);
-
-        cout << "max_2: " << max_2_ << endl;
-        cout << "max_1: " << max_1_ << endl;
     }
 
     virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const
@@ -397,7 +396,7 @@ void SimulationController_SingleLocusSelection::initialize()
         Population::Config& config_gen_next = configs_gen_next[i];
         config_gen_next.size = config_.population_size;
         config_gen_next.populationID = i; 
-        config_gen_next.matingDistribution.push_back(1, make_pair(0,0));
+        config_gen_next.matingDistribution.push_back(1, make_pair(i,i));
     }
     for (size_t i=0; i<config_.generation_count; ++i)
         simulator_config_.population_configs.push_back(configs_gen_next); // copy
