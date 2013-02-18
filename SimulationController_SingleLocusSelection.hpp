@@ -30,16 +30,14 @@ class SimulationController_SingleLocusSelection : public SimulationController
 
     struct Config
     {
-        int seed;
+        int seed;                               // "seed"
         std::string output_directory;           // "outdir"
-
         size_t population_count;                // "popcount"
         size_t population_size;                 // "popsize"
         size_t generation_count;                // "gencount"
         double initial_allele_frequency;        // "allelefreq"
-        
-        // relative fitnesses for genotype g in {0,1,2}, where g is the # of selected alleles
-        std::vector<double> w;                       // "w0", "w1", "w2"
+        std::vector<double> w;                  // "w0", "w1", "w2" (relative fitnesses for genotype in {0,1,2})
+        bool verbose;                           // "verbose" (for debugging)
 
         Config(const Parameters& parameters = Parameters()); // allows auto conversion: Parameters->Config
     };
@@ -58,6 +56,9 @@ class SimulationController_SingleLocusSelection : public SimulationController
     Simulator::Config simulator_config_;
     SimulatorPtr simulator_;
 };
+
+
+std::ostream& operator<<(std::ostream& os, const SimulationController_SingleLocusSelection::Config& config);
 
 
 #endif //  _SIMULATIONCONTROLLER_SINGLELOCUSSELECTION_HPP_

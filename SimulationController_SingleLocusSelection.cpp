@@ -39,14 +39,16 @@ class Reporter_Population : public Reporter
 {
     public:
 
-    Reporter_Population(const string& output_directory)
-    :   outdir_(output_directory)
+    Reporter_Population(const string& output_directory, bool verbose)
+    :   outdir_(output_directory), verbose_(verbose)
     {}
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
+        if (!verbose_) return;
+
         if (populations.size() != population_datas.size())
             throw runtime_error("[Reporter_Population] Population data size mismatch.");
 
@@ -75,6 +77,7 @@ class Reporter_Population : public Reporter
     private:
 
     bfs::path outdir_;
+    bool verbose_;
 };
 
 
@@ -82,14 +85,16 @@ class Reporter_Genotypes : public Reporter
 {
     public:
 
-    Reporter_Genotypes(const string& output_directory, Locus locus)
-    :   outdir_(output_directory), locus_(locus)
+    Reporter_Genotypes(const string& output_directory, Locus locus, bool verbose)
+    :   outdir_(output_directory), locus_(locus), verbose_(verbose)
     {}
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
+        if (!verbose_) return;
+
         if (populations.size() != population_datas.size())
             throw runtime_error("[Reporter_Genotypes] Population data size mismatch.");
 
@@ -120,6 +125,7 @@ class Reporter_Genotypes : public Reporter
 
     bfs::path outdir_;
     Locus locus_;
+    bool verbose_;
 };
 
 
@@ -127,14 +133,16 @@ class Reporter_Fitnesses : public Reporter
 {
     public:
 
-    Reporter_Fitnesses(const string& output_directory)
-    :   outdir_(output_directory)
+    Reporter_Fitnesses(const string& output_directory, bool verbose)
+    :   outdir_(output_directory), verbose_(verbose)
     {}
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
+        if (!verbose_) return;
+
         if (populations.size() != population_datas.size())
             throw runtime_error("[Reporter_Fitnesses] Population data size mismatch.");
 
@@ -164,6 +172,7 @@ class Reporter_Fitnesses : public Reporter
     private:
 
     bfs::path outdir_;
+    bool verbose_;
 };
 
 
@@ -252,12 +261,27 @@ SimulationController_SingleLocusSelection::Config::Config(const Parameters& para
     generation_count = parameters.count("gencount") ? atoi(parameters.at("gencount").c_str()) : 0;
     initial_allele_frequency = parameters.count("allelefreq") ? atof(parameters.at("allelefreq").c_str()) : 0; // atof
 
-    cout << "allelefreq string: " << parameters.at("allelefreq") << endl;
-    cout << "allelefreq: " << atof(parameters.at("allelefreq").c_str()) << endl;
-
     w[0] = parameters.count("w0") ? atof(parameters.at("w0").c_str()) : 1;
     w[1] = parameters.count("w1") ? atof(parameters.at("w1").c_str()) : 1;
     w[2] = parameters.count("w2") ? atof(parameters.at("w2").c_str()) : 1;
+
+    verbose = parameters.count("verbose"); // no good for verbose=0
+}
+
+
+std::ostream& operator<<(std::ostream& os, const SimulationController_SingleLocusSelection::Config& config)
+{
+    os << "seed = " << config.seed << endl;
+    os << "outdir = " << config.output_directory << endl;
+    os << "popcount = " << config.population_count << endl;
+    os << "popsize = " << config.population_size << endl;
+    os << "gencount = " << config.generation_count << endl;
+    os << "allelefreq = " << config.initial_allele_frequency << endl;
+    os << "w0 = " << config.w[0] << endl;
+    os << "w1 = " << config.w[1] << endl;
+    os << "w2 = " << config.w[2] << endl;
+    if (config.verbose) os << "verbose" << endl;
+    return os;
 }
 
 
@@ -280,11 +304,12 @@ void SimulationController_SingleLocusSelection::SimulationController_SingleLocus
     cout << "Optional parameters:\n";
     cout << "  config=<config_filename>\n";
     cout << "  seed=<value>\n";
-    cout << "  popcount=<population_count> (default: 1)\n";
-    cout << "  allelefreq=<initial_allele_frequency> (default: allelefreq=0)\n";
-    cout << "  w0=<relative_fitness_genotype_0> (default: w0=1)\n";
-    cout << "  w1=<relative_fitness_genotype_1> (default: w1=1)\n";
-    cout << "  w2=<relative_fitness_genotype_2> (default: w2=1)\n";
+    cout << "  popcount=<population_count>              (default: 1)\n";
+    cout << "  allelefreq=<initial_allele_frequency>    (default: allelefreq=0)\n";
+    cout << "  w0=<relative_fitness_genotype_0>         (default: w0=1)\n";
+    cout << "  w1=<relative_fitness_genotype_1>         (default: w1=1)\n";
+    cout << "  w2=<relative_fitness_genotype_2>         (default: w2=1)\n";
+    cout << "  verbose\n"; 
     cout << endl;
 }
 
@@ -309,18 +334,18 @@ void SimulationController_SingleLocusSelection::initialize()
         throw runtime_error("[SimulationController_SingleLocusSelection] Generation count not specified (gencount=value).");
 
     bfs::create_directories(config_.output_directory);
+    bfs::ofstream os_config(bfs::path(config_.output_directory) / "config.txt");
+    os_config << config_ << endl;
+    os_config.close();
+
+    cout << config_ << endl;
 
     // initialize simulator
 
     simulator_config_.seed = config_.seed;
-    
-    cout << "seed: " << config_.seed << endl; // TODO: remove
-    cout << "initial_allele_frequency: " << config_.initial_allele_frequency << endl; // TODO: remove
-    cout << "w: ";
-    copy(config_.w.begin(), config_.w.end(), ostream_iterator<double>(cout, " "));
-    cout << endl;
-
     simulator_config_.output_directory = config_.output_directory;    
+
+    // population configs
 
     Population::Configs configs_gen_0(config_.population_count);
     for (size_t i=0; i<config_.population_count; ++i)
@@ -341,7 +366,7 @@ void SimulationController_SingleLocusSelection::initialize()
         config_gen_next.matingDistribution.push_back(1, make_pair(0,0));
     }
     for (size_t i=0; i<config_.generation_count; ++i)
-        simulator_config_.population_configs.push_back(configs_gen_next);
+        simulator_config_.population_configs.push_back(configs_gen_next); // copy
 
     bfs::ofstream os(bfs::path(config_.output_directory) / "popconfig.txt");
     if (!os)
@@ -349,6 +374,7 @@ void SimulationController_SingleLocusSelection::initialize()
     os << simulator_config_.population_configs;
     os.close();
 
+    // QuantitativeTraits, FitnessFunction, SNPIndicator, Reporters
 
     Locus locus(0, 100000); // hardcoded locus
     int qtid = 0; // hardcoded QT id
@@ -362,15 +388,9 @@ void SimulationController_SingleLocusSelection::initialize()
     simulator_config_.snp_indicator = SNPIndicatorPtr(new SNPIndicator_SingleLocusHardyWeinberg(
         locus, config_.population_size, config_.initial_allele_frequency));
     
-    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Population(config_.output_directory)));
-    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Genotypes(config_.output_directory, locus)));
-    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Fitnesses(config_.output_directory)));
-
-    // Reporters:  
-    //   full population for debugging 
-    //   allele freq / homozygosity
-    //   block lengths?
-    //   mean fitness
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Population(config_.output_directory, config_.verbose)));
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Genotypes(config_.output_directory, locus, config_.verbose)));
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Fitnesses(config_.output_directory, config_.verbose)));
 
     simulator_ = SimulatorPtr(new Simulator(simulator_config_));
 }
