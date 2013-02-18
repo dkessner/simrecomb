@@ -19,6 +19,7 @@
 
 #include "SimulationController_SingleLocusSelection.hpp"
 #include "boost/filesystem.hpp"
+#include "boost/filesystem/fstream.hpp"
 #include "boost/lambda/lambda.hpp"
 #include <iostream>
 #include <sstream>
@@ -33,33 +34,37 @@ using namespace boost::lambda;
 //
 // TODO:  move this stuff
 
-class Reporter_Temp : public Reporter // simple reporter for testing
+
+class Reporter_Population : public Reporter
 {
     public:
 
-    Reporter_Temp(const string& output_directory)
+    Reporter_Population(const string& output_directory)
     :   outdir_(output_directory)
-    {
-        os_log_.open(outdir_ / "log.txt");
-        if (!os_log_)
-            throw runtime_error("[Reporter_Temp] Unable to open log.");
-    }
+    {}
 
     virtual void update(size_t generation_number,
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
-        os_log_ << "generation: " << generation_number << endl;
-        os_log_ << "populations: " << populations.size() << endl;
-        assert(populations.size() == 1);
-        os_log_ << "population 0 size: " << populations.front()->size() << endl;
+        if (populations.size() != population_datas.size())
+            throw runtime_error("[Reporter_Population] Population data size mismatch.");
 
-        ostringstream filename;
-        filename << "pop0_" << generation_number << ".txt"; 
-        bfs::ofstream os_pop(outdir_ / filename.str());
-        if (!os_pop)
-            throw runtime_error(("[Reporter_Temp] Unable to open " + filename.str()).c_str());
-        os_pop << *populations.front();
+        const size_t population_count = populations.size();
+        const char* filestem = "population";
+
+        for (size_t population_index=0; population_index<population_count; ++population_index)
+        {
+            ostringstream filename;
+            filename << filestem << "_" << generation_number << "_" << population_index << ".txt"; 
+
+            bfs::ofstream os(outdir_ / filename.str());
+            if (!os)
+                throw runtime_error(("[Reporter_Population] Unable to open " + filename.str()).c_str());
+
+            os << *populations[population_index];
+            os.close();
+        }
     }
 
     virtual void update_final(size_t generation_number,
@@ -70,7 +75,6 @@ class Reporter_Temp : public Reporter // simple reporter for testing
     private:
 
     bfs::path outdir_;
-    bfs::ofstream os_log_;
 };
 
 
@@ -86,17 +90,25 @@ class Reporter_Genotypes : public Reporter
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
-        ostringstream filename;
-        filename << "genotypes_" << generation_number << ".txt"; 
-        bfs::ofstream os(outdir_ / filename.str());
-        if (!os)
-            throw runtime_error(("[Reporter_Genotypes] Unable to open " + filename.str()).c_str());
+        if (populations.size() != population_datas.size())
+            throw runtime_error("[Reporter_Genotypes] Population data size mismatch.");
 
-        if (population_datas.size() != 1)
-            throw runtime_error("[Reporter_Genotypes] Expecting single population.");
-    
-        GenotypeDataPtr genotypes = population_datas[0].genotypes->at(locus_);
-        copy(genotypes->begin(), genotypes->end(), ostream_iterator<int>(os, "\n"));
+        const size_t population_count = populations.size();
+        const char* filestem = "genotypes";
+
+        for (size_t population_index=0; population_index<population_count; ++population_index)
+        {
+            ostringstream filename;
+            filename << filestem << "_" << generation_number << "_" << population_index << ".txt"; 
+
+            bfs::ofstream os(outdir_ / filename.str());
+            if (!os)
+                throw runtime_error(("[Reporter_Genotypes] Unable to open " + filename.str()).c_str());
+
+            GenotypeDataPtr genotypes = population_datas[population_index].genotypes->at(locus_);
+            copy(genotypes->begin(), genotypes->end(), ostream_iterator<int>(os, "\n"));
+            os.close();
+        }
     }
 
     virtual void update_final(size_t generation_number,
@@ -123,17 +135,25 @@ class Reporter_Fitnesses : public Reporter
                         const PopulationPtrs& populations,
                         const PopulationDatas& population_datas)
     {
-        ostringstream filename;
-        filename << "fitnesses_" << generation_number << ".txt"; 
-        bfs::ofstream os(outdir_ / filename.str());
-        if (!os)
-            throw runtime_error(("[Reporter_Fitnesses] Unable to open " + filename.str()).c_str());
+        if (populations.size() != population_datas.size())
+            throw runtime_error("[Reporter_Fitnesses] Population data size mismatch.");
 
-        if (population_datas.size() != 1)
-            throw runtime_error("[Reporter_Fitnesses] Expecting single population.");
+        const size_t population_count = populations.size();
+        const char* filestem = "fitnesses";
 
-        const DataVector& fitnesses = *population_datas[0].fitnesses;
-        copy(fitnesses.begin(), fitnesses.end(), ostream_iterator<double>(os, "\n"));
+        for (size_t population_index=0; population_index<population_count; ++population_index)
+        {
+            ostringstream filename;
+            filename << filestem << "_" << generation_number << "_" << population_index << ".txt"; 
+
+            bfs::ofstream os(outdir_ / filename.str());
+            if (!os)
+                throw runtime_error(("[Reporter_Fitnesses] Unable to open " + filename.str()).c_str());
+
+            const DataVector& fitnesses = *population_datas[population_index].fitnesses;
+            copy(fitnesses.begin(), fitnesses.end(), ostream_iterator<double>(os, "\n"));
+            os.close();
+        }
     }
 
     virtual void update_final(size_t generation_number,
@@ -227,6 +247,7 @@ SimulationController_SingleLocusSelection::Config::Config(const Parameters& para
     seed = parameters.count("seed") ? atoi(parameters.at("seed").c_str()) : 0;
     output_directory = parameters.count("outdir") ? parameters.at("outdir") : "";
 
+    population_count = parameters.count("popcount") ? atoi(parameters.at("popcount").c_str()) : 1;
     population_size = parameters.count("popsize") ? atoi(parameters.at("popsize").c_str()) : 0;
     generation_count = parameters.count("gencount") ? atoi(parameters.at("gencount").c_str()) : 0;
     initial_allele_frequency = parameters.count("allelefreq") ? atof(parameters.at("allelefreq").c_str()) : 0; // atof
@@ -259,6 +280,7 @@ void SimulationController_SingleLocusSelection::SimulationController_SingleLocus
     cout << "Optional parameters:\n";
     cout << "  config=<config_filename>\n";
     cout << "  seed=<value>\n";
+    cout << "  popcount=<population_count> (default: 1)\n";
     cout << "  allelefreq=<initial_allele_frequency> (default: allelefreq=0)\n";
     cout << "  w0=<relative_fitness_genotype_0> (default: w0=1)\n";
     cout << "  w1=<relative_fitness_genotype_1> (default: w1=1)\n";
@@ -300,20 +322,33 @@ void SimulationController_SingleLocusSelection::initialize()
 
     simulator_config_.output_directory = config_.output_directory;    
 
-    Population::Configs configs_gen_0(1);
-    Population::Config& config_gen_0 = configs_gen_0.back();
-    config_gen_0.size = config_.population_size;
-    config_gen_0.populationID = 0; 
-    config_gen_0.chromosomePairCount = 1; 
-    simulator_config_.population_configs.push_back(configs_gen_0);
+    Population::Configs configs_gen_0(config_.population_count);
+    for (size_t i=0; i<config_.population_count; ++i)
+    {
+        Population::Config& popconfig = configs_gen_0[i];
+        popconfig.size = config_.population_size;
+        popconfig.populationID = i;
+        popconfig.chromosomePairCount = 1;
+    }
+    simulator_config_.population_configs.push_back(configs_gen_0); // copy
 
-    Population::Configs configs_gen_next(1);
-    Population::Config& config_gen_next = configs_gen_next.back();
-    config_gen_next.size = config_.population_size;
-    config_gen_next.populationID = 0; 
-    config_gen_next.matingDistribution.push_back(1, make_pair(0,0));
+    Population::Configs configs_gen_next(config_.population_count);
+    for (size_t i=0; i<config_.population_count; ++i)
+    {
+        Population::Config& config_gen_next = configs_gen_next[i];
+        config_gen_next.size = config_.population_size;
+        config_gen_next.populationID = i; 
+        config_gen_next.matingDistribution.push_back(1, make_pair(0,0));
+    }
     for (size_t i=0; i<config_.generation_count; ++i)
         simulator_config_.population_configs.push_back(configs_gen_next);
+
+    bfs::ofstream os(bfs::path(config_.output_directory) / "popconfig.txt");
+    if (!os)
+        throw runtime_error("[SimulationController_SingleLocusSelection] Unable to open popconfig.txt");
+    os << simulator_config_.population_configs;
+    os.close();
+
 
     Locus locus(0, 100000); // hardcoded locus
     int qtid = 0; // hardcoded QT id
@@ -327,7 +362,7 @@ void SimulationController_SingleLocusSelection::initialize()
     simulator_config_.snp_indicator = SNPIndicatorPtr(new SNPIndicator_SingleLocusHardyWeinberg(
         locus, config_.population_size, config_.initial_allele_frequency));
     
-    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Temp(config_.output_directory)));
+    simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Population(config_.output_directory)));
     simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Genotypes(config_.output_directory, locus)));
     simulator_config_.reporters.push_back(ReporterPtr(new Reporter_Fitnesses(config_.output_directory)));
 

@@ -33,6 +33,7 @@ class SimulationController_SingleLocusSelection : public SimulationController
         int seed;
         std::string output_directory;           // "outdir"
 
+        size_t population_count;                // "popcount"
         size_t population_size;                 // "popsize"
         size_t generation_count;                // "gencount"
         double initial_allele_frequency;        // "allelefreq"
