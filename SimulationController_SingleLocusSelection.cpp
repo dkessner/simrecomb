@@ -225,8 +225,8 @@ class SNPIndicator_SingleLocusHardyWeinberg : public SNPIndicator
         // genotypes:   (2, 2, 2, ... , 2,  1, 1,  ... , 1,  0, 0,  ... , 0)
         //                       N*p^2            N(2pq)          N*q^2
 
-        max_2_ = N * p * p;
-        max_1_ = N * (1 - q*q);
+        max_2_ = size_t(N * p * p);
+        max_1_ = size_t(N * (1 - q*q));
     }
 
     virtual unsigned int operator()(unsigned int chromosome_id, const Locus& locus) const
